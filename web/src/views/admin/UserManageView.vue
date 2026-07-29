@@ -7,7 +7,7 @@
           <p>Create and manage accounts for Admin, Cashier, Kitchen, and Waiter staff</p>
         </div>
 
-        <button class="btn-primary" @click="showAddModal = true">+ Add New User</button>
+        <button class="btn-primary" @click="openAddModal">+ Add New User</button>
       </div>
 
       <div v-if="loading" class="card">
@@ -26,7 +26,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="u in users" :key="u.id">
+            <tr v-for="u in users" :key="u.id" :class="{ 'user-inactive': !u.is_active }">
               <td class="font-bold">{{ u.username }}</td>
               <td>{{ u.display_name }}</td>
               <td>
@@ -36,9 +36,15 @@
                 <span :class="['status-dot', u.is_active ? 'active' : 'inactive']"></span>
                 {{ u.is_active ? 'Active' : 'Inactive' }}
               </td>
-              <td>
-                <button class="btn-secondary sm-btn" @click="deactivateUser(u.id)" v-if="u.is_active">
+              <td class="action-cell">
+                <button class="btn-secondary sm-btn" @click="openEditModal(u)">
+                  ✏️ Edit
+                </button>
+                <button class="btn-danger sm-btn" @click="toggleUserActive(u, false)" v-if="u.is_active">
                   Deactivate
+                </button>
+                <button class="btn-success sm-btn" @click="toggleUserActive(u, true)" v-else>
+                  ✨ Reactivate
                 </button>
               </td>
             </tr>
@@ -46,13 +52,13 @@
         </table>
       </div>
 
-      <!-- Add User Modal -->
-      <div v-if="showAddModal" class="modal-backdrop" @click.self="showAddModal = false">
+      <!-- Add / Edit User Modal -->
+      <div v-if="showModal" class="modal-backdrop" @click.self="showModal = false">
         <div class="modal-card glass">
-          <h3>Create New Staff Account</h3>
+          <h3>{{ editingUserId ? 'Edit Staff Account' : 'Create New Staff Account' }}</h3>
 
-          <form @submit.prevent="createUser">
-            <div class="form-group">
+          <form @submit.prevent="saveUser">
+            <div class="form-group" v-if="!editingUserId">
               <label>Username</label>
               <input v-model="form.username" type="text" class="form-input" required />
             </div>
@@ -63,8 +69,13 @@
             </div>
 
             <div class="form-group">
-              <label>Password</label>
-              <input v-model="form.password" type="password" class="form-input" required />
+              <label>Password {{ editingUserId ? '(leave empty to keep current)' : '' }}</label>
+              <input
+                v-model="form.password"
+                type="password"
+                class="form-input"
+                :required="!editingUserId"
+              />
             </div>
 
             <div class="form-group">
@@ -78,8 +89,10 @@
             </div>
 
             <div class="modal-actions">
-              <button type="button" class="btn-secondary" @click="showAddModal = false">Cancel</button>
-              <button type="submit" class="btn-primary">Create User</button>
+              <button type="button" class="btn-secondary" @click="showModal = false">Cancel</button>
+              <button type="submit" class="btn-primary" :disabled="submitting">
+                {{ submitting ? 'Saving...' : (editingUserId ? 'Update User' : 'Create User') }}
+              </button>
             </div>
           </form>
         </div>
@@ -95,7 +108,9 @@ import { api } from '../../composables/useApi.ts';
 
 const users = ref<any[]>([]);
 const loading = ref(true);
-const showAddModal = ref(false);
+const showModal = ref(false);
+const editingUserId = ref<string | null>(null);
+const submitting = ref(false);
 
 const form = ref({
   username: '',
@@ -116,24 +131,63 @@ async function fetchUsers() {
   }
 }
 
-async function createUser() {
+function openAddModal() {
+  editingUserId.value = null;
+  form.value = { username: '', display_name: '', password: '', role: 'cashier' };
+  showModal.value = true;
+}
+
+function openEditModal(u: any) {
+  editingUserId.value = u.id;
+  form.value = {
+    username: u.username,
+    display_name: u.display_name,
+    password: '',
+    role: u.role,
+  };
+  showModal.value = true;
+}
+
+async function saveUser() {
+  submitting.value = true;
   try {
-    await api.post('/users', form.value);
-    showAddModal.value = false;
-    form.value = { username: '', display_name: '', password: '', role: 'cashier' };
+    if (editingUserId.value) {
+      // Update
+      const payload: any = {
+        display_name: form.value.display_name,
+        role: form.value.role,
+      };
+      if (form.value.password.trim()) {
+        payload.password = form.value.password;
+      }
+      await api.put(`/users/${editingUserId.value}`, payload);
+    } else {
+      // Create
+      await api.post('/users', form.value);
+    }
+
+    showModal.value = false;
     await fetchUsers();
   } catch (err: any) {
-    alert(err.response?.data?.error || 'Failed to create user.');
+    alert(err.response?.data?.error || 'Failed to save user.');
+  } finally {
+    submitting.value = false;
   }
 }
 
-async function deactivateUser(id: string) {
-  if (!confirm('Deactivate this user account?')) return;
+async function toggleUserActive(user: any, is_active: boolean) {
+  const actionName = is_active ? 'Reactivate' : 'Deactivate';
+  if (!confirm(`${actionName} user "${user.username}"?`)) return;
+
   try {
-    await api.delete(`/users/${id}`);
+    if (is_active) {
+      await api.put(`/users/${user.id}`, { is_active: true });
+    } else {
+      await api.delete(`/users/${user.id}`);
+    }
     await fetchUsers();
   } catch (err: any) {
-    alert(err.response?.data?.error || 'Failed to deactivate user.');
+    alert(err.response?.data?.error || `Failed to ${actionName.toLowerCase()} user.`);
   }
 }
 
@@ -173,6 +227,10 @@ onMounted(() => {
   text-transform: uppercase;
 }
 
+.user-inactive {
+  opacity: 0.6;
+}
+
 .role-badge {
   background: var(--bg-card-hover);
   padding: 0.2rem 0.6rem;
@@ -198,8 +256,13 @@ onMounted(() => {
   background: var(--danger);
 }
 
+.action-cell {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .sm-btn {
-  padding: 0.3rem 0.6rem;
+  padding: 0.35rem 0.65rem;
   font-size: 0.75rem;
 }
 
