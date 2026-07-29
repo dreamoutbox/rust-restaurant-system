@@ -1,16 +1,16 @@
 use axum::{
-    extract::{Path, State},
-    http::{header, HeaderMap, StatusCode},
     Json,
+    extract::{Path, State},
+    http::{HeaderMap, StatusCode, header},
 };
-use qrcode::render::svg;
 use qrcode::QrCode;
+use qrcode::render::svg;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::{
     error::AppError,
-    middleware::auth::{require_role, AuthUser},
+    middleware::auth::{AuthUser, require_role},
     models::table::{CreateTableReq, Table, TableWithStatus, UpdateTableReq},
     models::user::UserRole,
 };

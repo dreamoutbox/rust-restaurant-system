@@ -35,7 +35,7 @@ pub async fn checkout_order(
     // Sum up order items total
     let total_row = sqlx::query!(
         r#"
-        SELECT COALESCE(SUM(quantity * unit_price), 0) as "total!: i64"
+        SELECT COALESCE(SUM(quantity * unit_price), 0)::bigint as "total!: i64"
         FROM order_items
         WHERE order_id = $1
         "#,
