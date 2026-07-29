@@ -97,7 +97,7 @@
           <div class="items-container">
             <div class="items-header">
               <span>Items ({{ order.items.length }})</span>
-              <span class="items-total">Total: ${{ Number(order.total_amount).toFixed(2) }}</span>
+              <span class="items-total">Total: ${{ formatCents(order.total_amount) }}</span>
             </div>
 
             <div v-if="order.items.length === 0" class="no-items">
@@ -117,7 +117,7 @@
                 </div>
 
                 <div class="item-right">
-                  <span class="item-price">${{ (Number(item.unit_price) * item.quantity).toFixed(2) }}</span>
+                  <span class="item-price">${{ formatCents(item.unit_price * item.quantity) }}</span>
 
                   <!-- Status Selector for Staff -->
                   <div class="status-action" v-if="canManageItemStatus">
@@ -177,7 +177,7 @@
             <div class="receipt-items">
               <div v-for="item in selectedOrderModal.items" :key="item.id" class="receipt-row">
                 <span>{{ item.quantity }}x {{ item.menu_item_name }}</span>
-                <span>${{ (Number(item.unit_price) * item.quantity).toFixed(2) }}</span>
+                <span>${{ formatCents(item.unit_price * item.quantity) }}</span>
               </div>
             </div>
 
@@ -194,7 +194,7 @@
               </div>
               <div class="summary-row total-line">
                 <span>Grand Total:</span>
-                <span class="total-price">${{ Number(selectedOrderModal.total_amount).toFixed(2) }}</span>
+                <span class="total-price">${{ formatCents(selectedOrderModal.total_amount) }}</span>
               </div>
             </div>
           </div>
@@ -292,6 +292,11 @@ const filteredOrders = computed(() => {
     return true;
   });
 });
+
+function formatCents(cents: number | string) {
+  const c = typeof cents === 'string' ? parseInt(cents, 10) : cents;
+  return ((c || 0) / 100).toFixed(2);
+}
 
 function getStatusCount(status: string) {
   if (status === 'all') return orders.value.length;

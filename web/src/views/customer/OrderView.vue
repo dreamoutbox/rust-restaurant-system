@@ -8,7 +8,7 @@
 
       <button class="cart-trigger btn-primary" @click="showCart = true">
         🛒 Cart ({{ totalCartCount }})
-        <span class="cart-price" v-if="cartTotal > 0">${{ cartTotal.toFixed(2) }}</span>
+        <span class="cart-price" v-if="cartTotal > 0">${{ formatCents(cartTotal) }}</span>
       </button>
     </header>
 
@@ -34,7 +34,7 @@
             <span class="qty">{{ item.quantity }}x</span>
             <span class="name">{{ item.menu_item_name }}</span>
             <StatusBadge :status="item.status" />
-            <span class="price">${{ (Number(item.unit_price) * item.quantity).toFixed(2) }}</span>
+            <span class="price">${{ formatCents(item.unit_price * item.quantity) }}</span>
           </div>
         </div>
       </section>
@@ -71,7 +71,7 @@
           <div class="item-details">
             <div class="item-header">
               <h4 class="item-title">{{ item.name }}</h4>
-              <span class="item-price">${{ Number(item.price).toFixed(2) }}</span>
+              <span class="item-price">${{ formatCents(item.price) }}</span>
             </div>
             <p class="item-desc">{{ item.description || 'Delicious freshly prepared dish' }}</p>
 
@@ -107,7 +107,7 @@
           <div v-for="entry in cart" :key="entry.item.id" class="cart-item-row">
             <div class="cart-item-info">
               <h4>{{ entry.item.name }}</h4>
-              <span class="unit-price">${{ Number(entry.item.price).toFixed(2) }}</span>
+              <span class="unit-price">${{ formatCents(entry.item.price) }}</span>
               <input
                 v-model="entry.note"
                 type="text"
@@ -126,7 +126,7 @@
         <div class="drawer-footer" v-if="cart.length > 0">
           <div class="total-row">
             <span>Subtotal</span>
-            <span class="total-amount">${{ cartTotal.toFixed(2) }}</span>
+            <span class="total-amount">${{ formatCents(cartTotal) }}</span>
           </div>
 
           <button class="btn-success submit-btn" :disabled="submitting" @click="submitOrder">
@@ -179,6 +179,11 @@ const categories = computed(() => {
   menuItems.value.forEach((i) => set.add(i.category_name));
   return Array.from(set);
 });
+
+function formatCents(cents: number | string) {
+  const c = typeof cents === 'string' ? parseInt(cents, 10) : cents;
+  return ((c || 0) / 100).toFixed(2);
+}
 
 const filteredMenuItems = computed(() => {
   if (!selectedCategory.value) return menuItems.value;

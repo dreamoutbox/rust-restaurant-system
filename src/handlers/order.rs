@@ -52,7 +52,7 @@ pub async fn get_customer_session_menu(
             c.name as category_name,
             m.name,
             m.description,
-            m.price,
+            m.price as "price!: i64",
             m.image_path,
             m.is_available,
             m.sort_order
@@ -195,7 +195,7 @@ pub async fn get_customer_order_status(
             oi.menu_item_id,
             m.name as menu_item_name,
             oi.quantity,
-            oi.unit_price,
+            oi.unit_price as "unit_price!: i64",
             oi.note,
             oi.status,
             oi.created_at
@@ -298,7 +298,7 @@ pub async fn list_orders(
         let table_name: String = row.get("table_name");
         let session_token: String = row.get("session_token");
         let status: String = row.get("status");
-        let total_amount: rust_decimal::Decimal = row.get("total_amount");
+        let total_amount: i64 = row.get("total_amount");
         let payment_method: Option<String> = row.get("payment_method");
         let stripe_session_id: Option<String> = row.get("stripe_session_id");
         let opened_at: chrono::DateTime<chrono::Utc> = row.get("opened_at");
@@ -314,7 +314,7 @@ pub async fn list_orders(
                 oi.menu_item_id,
                 m.name as menu_item_name,
                 oi.quantity,
-                oi.unit_price,
+                oi.unit_price as "unit_price!: i64",
                 oi.note,
                 oi.status,
                 oi.created_at
@@ -390,7 +390,7 @@ pub async fn get_order_detail(
             t.name as table_name,
             o.session_token,
             o.status,
-            o.total_amount,
+            o.total_amount as "total_amount!: i64",
             o.payment_method,
             o.stripe_session_id,
             o.opened_at,
@@ -414,7 +414,7 @@ pub async fn get_order_detail(
             oi.menu_item_id,
             m.name as menu_item_name,
             oi.quantity,
-            oi.unit_price,
+            oi.unit_price as "unit_price!: i64",
             oi.note,
             oi.status,
             oi.created_at

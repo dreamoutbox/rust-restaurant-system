@@ -1,9 +1,8 @@
 use axum::{
+    Json,
     extract::{Path, State},
     http::HeaderMap,
-    Json,
 };
-use rust_decimal::Decimal;
 use serde_json::json;
 use uuid::Uuid;
 
@@ -36,7 +35,7 @@ pub async fn checkout_order(
     // Sum up order items total
     let total_row = sqlx::query!(
         r#"
-        SELECT COALESCE(SUM(quantity * unit_price), 0.00) as "total!: Decimal"
+        SELECT COALESCE(SUM(quantity * unit_price), 0) as "total!: i64"
         FROM order_items
         WHERE order_id = $1
         "#,
@@ -50,9 +49,9 @@ pub async fn checkout_order(
     let updated_order = sqlx::query!(
         r#"
         UPDATE orders
-        SET status = 'checkout_pending', total_amount = $1
+        SET status = 'checkout_pending', total_amount = $1::bigint
         WHERE id = $2
-        RETURNING id, table_id, status, total_amount
+        RETURNING id, table_id, status, total_amount as "total_amount!: i64"
         "#,
         total_amount,
         order_id

@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS order_items (
     order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
     menu_item_id UUID NOT NULL REFERENCES menu_items(id) ON DELETE RESTRICT,
     quantity INT NOT NULL DEFAULT 1,
-    unit_price DECIMAL(10,2) NOT NULL,
+    unit_price BIGINT NOT NULL,
     note TEXT,
     status VARCHAR(20) NOT NULL CHECK (status IN ('pending', 'preparing', 'finished', 'served')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),

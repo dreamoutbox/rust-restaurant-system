@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 
 use chrono::{DateTime, Utc};
-use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -13,7 +12,7 @@ pub struct Order {
     pub table_id: Uuid,
     pub session_token: String,
     pub status: String,
-    pub total_amount: Decimal,
+    pub total_amount: i64,
     pub payment_method: Option<String>,
     pub stripe_session_id: Option<String>,
     pub opened_by: Option<Uuid>,
@@ -30,7 +29,7 @@ pub struct OrderDetail {
     pub table_name: String,
     pub session_token: String,
     pub status: String,
-    pub total_amount: Decimal,
+    pub total_amount: i64,
     pub payment_method: Option<String>,
     pub stripe_session_id: Option<String>,
     pub opened_at: DateTime<Utc>,

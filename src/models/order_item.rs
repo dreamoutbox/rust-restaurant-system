@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 
 use chrono::{DateTime, Utc};
-use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -11,7 +10,7 @@ pub struct OrderItem {
     pub order_id: Uuid,
     pub menu_item_id: Uuid,
     pub quantity: i32,
-    pub unit_price: Decimal,
+    pub unit_price: i64,
     pub note: Option<String>,
     pub status: String,
     pub created_at: DateTime<Utc>,
@@ -26,7 +25,7 @@ pub struct OrderItemDetail {
     pub menu_item_id: Uuid,
     pub menu_item_name: String,
     pub quantity: i32,
-    pub unit_price: Decimal,
+    pub unit_price: i64,
     pub note: Option<String>,
     pub status: String,
     pub created_at: DateTime<Utc>,

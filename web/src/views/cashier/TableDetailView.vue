@@ -57,7 +57,7 @@
           <div class="order-header">
             <h3>Active Order #{{ activeOrderDetail?.id.slice(0, 8) }}</h3>
             <span class="total-badge" v-if="activeOrderDetail">
-              Total: ${{ Number(activeOrderDetail.total_amount).toFixed(2) }}
+              Total: ${{ formatCents(activeOrderDetail.total_amount) }}
             </span>
           </div>
 
@@ -71,7 +71,7 @@
                 <div class="item-main">
                   <span class="qty">{{ item.quantity }}x</span>
                   <span class="name">{{ item.menu_item_name }}</span>
-                  <span class="price">${{ (Number(item.unit_price) * item.quantity).toFixed(2) }}</span>
+                  <span class="price">${{ formatCents(item.unit_price * item.quantity) }}</span>
                 </div>
                 <div class="item-sub">
                   <StatusBadge :status="item.status" />
@@ -131,6 +131,11 @@ const table = ref<any>(null);
 const activeOrderDetail = ref<any>(null);
 const loading = ref(true);
 const processing = ref(false);
+
+function formatCents(cents: number | string) {
+  const c = typeof cents === 'string' ? parseInt(cents, 10) : cents;
+  return ((c || 0) / 100).toFixed(2);
+}
 
 const { isConnected, connect } = useSse((event) => {
   console.log('SSE update in TableDetailView:', event);

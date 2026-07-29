@@ -1,8 +1,8 @@
 use axum::{
+    Json,
     extract::{Multipart, Path, State},
     http::StatusCode,
     response::IntoResponse,
-    Json,
 };
 use serde_json::json;
 use std::path::PathBuf;
@@ -11,16 +11,14 @@ use uuid::Uuid;
 
 use crate::{
     error::AppError,
-    middleware::auth::{require_role, AuthUser},
+    middleware::auth::{AuthUser, require_role},
     models::menu_item::{CreateMenuItemReq, MenuItem, MenuItemWithCategory, UpdateMenuItemReq},
     models::user::UserRole,
 };
 
 use super::auth::AppState;
 
-pub async fn list_menu(
-    State(state): State<AppState>,
-) -> Result<impl IntoResponse, AppError> {
+pub async fn list_menu(State(state): State<AppState>) -> Result<impl IntoResponse, AppError> {
     let rows = sqlx::query!(
         r#"
         SELECT
@@ -29,7 +27,7 @@ pub async fn list_menu(
             c.name as category_name,
             m.name,
             m.description,
-            m.price,
+            m.price as "price!: i64",
             m.image_path,
             m.is_available,
             m.sort_order
@@ -77,7 +75,7 @@ pub async fn list_all_menu_items(
             c.name as category_name,
             m.name,
             m.description,
-            m.price,
+            m.price as "price!: i64",
             m.image_path,
             m.is_available,
             m.sort_order
@@ -215,7 +213,9 @@ pub async fn delete_menu_item(
         .execute(&state.db)
         .await?;
 
-    Ok(Json(json!({ "message": "Menu item deactivated successfully" })))
+    Ok(Json(
+        json!({ "message": "Menu item deactivated successfully" }),
+    ))
 }
 
 pub async fn upload_menu_item_image(
@@ -244,11 +244,7 @@ pub async fn upload_menu_item_image(
         .map_err(|e| AppError::BadRequest(format!("Multipart parse error: {}", e)))?
     {
         let file_name = field.file_name().unwrap_or("image.png").to_string();
-        let ext = file_name
-            .rsplit('.')
-            .next()
-            .unwrap_or("png")
-            .to_lowercase();
+        let ext = file_name.rsplit('.').next().unwrap_or("png").to_lowercase();
 
         let new_file_name = format!("{}_{}.{}", id, Uuid::new_v4().simple(), ext);
         let dest_path = upload_dir.join(&new_file_name);
@@ -266,7 +262,8 @@ pub async fn upload_menu_item_image(
         break;
     }
 
-    let image_path = relative_file_path.ok_or_else(|| AppError::BadRequest("No file uploaded".to_string()))?;
+    let image_path =
+        relative_file_path.ok_or_else(|| AppError::BadRequest("No file uploaded".to_string()))?;
 
     sqlx::query("UPDATE menu_items SET image_path = $1, updated_at = now() WHERE id = $2")
         .bind(&image_path)

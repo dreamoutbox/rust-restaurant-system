@@ -1,5 +1,4 @@
 use chrono::{DateTime, Utc};
-use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -9,7 +8,7 @@ pub struct MenuItem {
     pub category_id: Uuid,
     pub name: String,
     pub description: Option<String>,
-    pub price: Decimal,
+    pub price: i64,
     pub image_path: Option<String>,
     pub is_available: bool,
     pub sort_order: i32,
@@ -24,7 +23,7 @@ pub struct MenuItemWithCategory {
     pub category_name: String,
     pub name: String,
     pub description: Option<String>,
-    pub price: Decimal,
+    pub price: i64,
     pub image_path: Option<String>,
     pub is_available: bool,
     pub sort_order: i32,
@@ -35,7 +34,7 @@ pub struct CreateMenuItemReq {
     pub category_id: Uuid,
     pub name: String,
     pub description: Option<String>,
-    pub price: Decimal,
+    pub price: i64,
     pub image_path: Option<String>,
     pub sort_order: Option<i32>,
 }
@@ -45,7 +44,7 @@ pub struct UpdateMenuItemReq {
     pub category_id: Option<Uuid>,
     pub name: Option<String>,
     pub description: Option<String>,
-    pub price: Option<Decimal>,
+    pub price: Option<i64>,
     pub image_path: Option<String>,
     pub is_available: Option<bool>,
     pub sort_order: Option<i32>,

@@ -34,16 +34,16 @@ ON CONFLICT (name) DO NOTHING;
 
 -- Seed Menu Items
 INSERT INTO menu_items (category_id, name, description, price, sort_order) VALUES
-    ('10000000-0000-0000-0000-000000000001', 'Crispy Spring Rolls', 'Vegetable spring rolls served with sweet chili sauce', 6.50, 1),
-    ('10000000-0000-0000-0000-000000000001', 'Garlic Butter Shrimp', 'Sautéed shrimp with garlic, white wine, and fresh parsley', 9.90, 2),
-    ('10000000-0000-0000-0000-000000000001', 'Caesar Salad', 'Romaine lettuce, parmesan, croutons, and Caesar dressing', 7.50, 3),
-    ('10000000-0000-0000-0000-000000000002', 'Grilled Ribeye Steak', '300g ribeye steak with truffle butter and mashed potatoes', 24.90, 1),
-    ('10000000-0000-0000-0000-000000000002', 'Classic Cheese Burger', 'Angus beef patty, cheddar, lettuce, tomato, pickles, and fries', 14.50, 2),
-    ('10000000-0000-0000-0000-000000000002', 'Creamy Carbonara Pasta', 'Spaghetti with guanciale, egg yolk, pecorino cheese, and black pepper', 13.00, 3),
-    ('10000000-0000-0000-0000-000000000002', 'Grilled Salmon Filet', 'Atlantic salmon with lemon herb sauce and roasted asparagus', 19.50, 4),
-    ('10000000-0000-0000-0000-000000000003', 'Tiramisu', 'Classic Italian coffee-flavored dessert', 6.50, 1),
-    ('10000000-0000-0000-0000-000000000003', 'Chocolate Lava Cake', 'Warm chocolate cake with a molten center and vanilla ice cream', 7.50, 2),
-    ('10000000-0000-0000-0000-000000000004', 'Iced Matcha Latte', 'Japanese green tea with fresh milk', 4.50, 1),
-    ('10000000-0000-0000-0000-000000000004', 'Fresh Lemonade', 'House-made sparkling lemonade', 3.80, 2),
-    ('10000000-0000-0000-0000-000000000004', 'Craft Pale Ale', 'Local craft beer 500ml', 6.00, 3)
+    ('10000000-0000-0000-0000-000000000001', 'Crispy Spring Rolls', 'Vegetable spring rolls served with sweet chili sauce', 650, 1),
+    ('10000000-0000-0000-0000-000000000001', 'Garlic Butter Shrimp', 'Sautéed shrimp with garlic, white wine, and fresh parsley', 990, 2),
+    ('10000000-0000-0000-0000-000000000001', 'Caesar Salad', 'Romaine lettuce, parmesan, croutons, and Caesar dressing', 750, 3),
+    ('10000000-0000-0000-0000-000000000002', 'Grilled Ribeye Steak', '300g ribeye steak with truffle butter and mashed potatoes', 2490, 1),
+    ('10000000-0000-0000-0000-000000000002', 'Classic Cheese Burger', 'Angus beef patty, cheddar, lettuce, tomato, pickles, and fries', 1450, 2),
+    ('10000000-0000-0000-0000-000000000002', 'Creamy Carbonara Pasta', 'Spaghetti with guanciale, egg yolk, pecorino cheese, and black pepper', 1300, 3),
+    ('10000000-0000-0000-0000-000000000002', 'Grilled Salmon Filet', 'Atlantic salmon with lemon herb sauce and roasted asparagus', 1950, 4),
+    ('10000000-0000-0000-0000-000000000003', 'Tiramisu', 'Classic Italian coffee-flavored dessert', 650, 1),
+    ('10000000-0000-0000-0000-000000000003', 'Chocolate Lava Cake', 'Warm chocolate cake with a molten center and vanilla ice cream', 750, 2),
+    ('10000000-0000-0000-0000-000000000004', 'Iced Matcha Latte', 'Japanese green tea with fresh milk', 450, 1),
+    ('10000000-0000-0000-0000-000000000004', 'Fresh Lemonade', 'House-made sparkling lemonade', 380, 2),
+    ('10000000-0000-0000-0000-000000000004', 'Craft Pale Ale', 'Local craft beer 500ml', 600, 3)
 ON CONFLICT DO NOTHING;
