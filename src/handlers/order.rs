@@ -1,8 +1,8 @@
 use axum::{
+    Json,
     extract::{Path, Query, State},
     http::StatusCode,
     response::IntoResponse,
-    Json,
 };
 use serde::Deserialize;
 use serde_json::json;
@@ -10,9 +10,9 @@ use uuid::Uuid;
 
 use crate::{
     error::AppError,
-    middleware::auth::{require_role, AuthUser},
+    middleware::auth::{AuthUser, require_role},
     models::menu_item::MenuItemWithCategory,
-    models::order::{Order, OrderDetail},
+    models::order::OrderDetail,
     models::order_item::{OrderItemDetail, SubmitOrderItemsReq},
     models::user::UserRole,
     sse::SseEvent,
@@ -27,7 +27,7 @@ pub struct OrderFilterQuery {
 }
 
 // Public: Customer gets menu for session token
-pub Result<impl IntoResponse, AppError> pub async fn get_customer_session_menu(
+pub async fn get_customer_session_menu(
     State(state): State<AppState>,
     Path(token): Path<String>,
 ) -> Result<impl IntoResponse, AppError> {
@@ -96,7 +96,9 @@ pub async fn submit_customer_order_items(
     Json(payload): Json<SubmitOrderItemsReq>,
 ) -> Result<impl IntoResponse, AppError> {
     if payload.items.is_empty() {
-        return Err(AppError::BadRequest("Cannot submit empty order".to_string()));
+        return Err(AppError::BadRequest(
+            "Cannot submit empty order".to_string(),
+        ));
     }
 
     let order = sqlx::query!(
@@ -110,7 +112,9 @@ pub async fn submit_customer_order_items(
     )
     .fetch_optional(&state.db)
     .await?
-    .ok_or_else(|| AppError::NotFound("Active order session not found for this token".to_string()))?;
+    .ok_or_else(|| {
+        AppError::NotFound("Active order session not found for this token".to_string())
+    })?;
 
     let mut created_item_ids = Vec::new();
 
@@ -126,7 +130,9 @@ pub async fn submit_customer_order_items(
         )
         .fetch_optional(&state.db)
         .await?
-        .ok_or_else(|| AppError::BadRequest(format!("Menu item {} unavailable", input.menu_item_id)))?;
+        .ok_or_else(|| {
+            AppError::BadRequest(format!("Menu item {} unavailable", input.menu_item_id))
+        })?;
 
         let created_item = sqlx::query!(
             r#"

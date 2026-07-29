@@ -1,8 +1,8 @@
+use argon2::PasswordVerifier;
 use axum::{
-    extract::State,
-    http::{header, HeaderMap, StatusCode},
-    response::IntoResponse,
     Json,
+    extract::{FromRef, State},
+    http::{HeaderMap, StatusCode, header},
 };
 use serde_json::json;
 use sqlx::PgPool;
@@ -10,7 +10,7 @@ use sqlx::PgPool;
 use crate::{
     config::Config,
     error::AppError,
-    middleware::auth::{generate_jwt, AuthUser, COOKIE_NAME},
+    middleware::auth::{AuthUser, COOKIE_NAME, generate_jwt},
     models::user::{LoginReq, User, UserResponse},
 };
 
@@ -21,10 +21,22 @@ pub struct AppState {
     pub sse: crate::sse::SseBroadcaster,
 }
 
+impl FromRef<AppState> for Config {
+    fn from_ref(state: &AppState) -> Self {
+        state.config.clone()
+    }
+}
+
+impl FromRef<AppState> for PgPool {
+    fn from_ref(state: &AppState) -> Self {
+        state.db.clone()
+    }
+}
+
 pub async fn login(
     State(state): State<AppState>,
     Json(payload): Json<LoginReq>,
-) -> Result<impl IntoResponse, AppError> {
+) -> Result<(StatusCode, HeaderMap, Json<serde_json::Value>), AppError> {
     let user = sqlx::query_as::<_, User>(
         "SELECT id, username, password_hash, display_name, role, is_active, created_at, updated_at FROM users WHERE username = $1 AND is_active = true",
     )
@@ -65,7 +77,7 @@ pub async fn login(
     ))
 }
 
-pub async fn logout() -> impl IntoResponse {
+pub async fn logout() -> (HeaderMap, Json<serde_json::Value>) {
     let cookie_header = format!(
         "{}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0",
         COOKIE_NAME
@@ -74,13 +86,16 @@ pub async fn logout() -> impl IntoResponse {
     let mut headers = HeaderMap::new();
     headers.insert(header::SET_COOKIE, cookie_header.parse().unwrap());
 
-    (headers, Json(json!({ "message": "Logged out successfully" })))
+    (
+        headers,
+        Json(json!({ "message": "Logged out successfully" })),
+    )
 }
 
 pub async fn get_me(
     State(state): State<AppState>,
     AuthUser(claims): AuthUser,
-) -> Result<impl IntoResponse, AppError> {
+) -> Result<Json<UserResponse>, AppError> {
     let user = sqlx::query_as::<_, User>(
         "SELECT id, username, password_hash, display_name, role, is_active, created_at, updated_at FROM users WHERE id = $1",
     )

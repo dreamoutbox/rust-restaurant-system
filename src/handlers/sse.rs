@@ -4,11 +4,11 @@ use axum::{
 };
 use futures_util::stream::Stream;
 use std::{convert::Infallible, time::Duration};
-use tokio_stream::{wrappers::BroadcastStream, StreamExt};
+use tokio_stream::{StreamExt, wrappers::BroadcastStream};
 
 use crate::{
     error::AppError,
-    middleware::auth::{require_role, AuthUser},
+    middleware::auth::{AuthUser, require_role},
     models::user::UserRole,
 };
 

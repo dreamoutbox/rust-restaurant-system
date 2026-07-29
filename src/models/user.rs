@@ -92,7 +92,7 @@ pub struct LoginReq {
     pub password: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
     pub sub: Uuid,
     pub username: String,

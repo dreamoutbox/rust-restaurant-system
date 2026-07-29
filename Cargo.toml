@@ -15,7 +15,7 @@ sqlx = { version = "0.8", features = [
     "postgres",
     "uuid",
     "chrono",
-    "bigdecimal",
+    "rust_decimal",
 ] }
 
 jsonwebtoken = "9"
@@ -33,5 +33,6 @@ rust_decimal = { version = "1", features = ["serde-with-str"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-async-stripe = "=1.0.0-rc.6"
-async-stripe-core = { version = "=1.0.0-rc.6", features = ["customer"] }
+async-trait = "0.1"
+futures-util = "0.3.33"
+tokio-stream = { version = "0.1.19", features = ["sync"] }

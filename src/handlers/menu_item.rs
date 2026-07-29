@@ -4,7 +4,6 @@ use axum::{
     response::IntoResponse,
     Json,
 };
-use rust_decimal::Decimal;
 use serde_json::json;
 use std::path::PathBuf;
 use tokio::fs;

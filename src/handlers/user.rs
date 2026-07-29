@@ -5,7 +5,6 @@ use argon2::{
 use axum::{
     extract::{Path, State},
     http::StatusCode,
-    response::IntoResponse,
     Json,
 };
 use serde_json::json;
@@ -22,7 +21,7 @@ use super::auth::AppState;
 pub async fn list_users(
     State(state): State<AppState>,
     AuthUser(claims): AuthUser,
-) -> Result<impl IntoResponse, AppError> {
+) -> Result<Json<Vec<UserResponse>>, AppError> {
     require_role(&claims, &[UserRole::Admin])?;
 
     let users = sqlx::query_as::<_, User>(
@@ -39,7 +38,7 @@ pub async fn create_user(
     State(state): State<AppState>,
     AuthUser(claims): AuthUser,
     Json(payload): Json<CreateUserReq>,
-) -> Result<impl IntoResponse, AppError> {
+) -> Result<(StatusCode, Json<UserResponse>), AppError> {
     require_role(&claims, &[UserRole::Admin])?;
 
     // Validate role
@@ -83,7 +82,7 @@ pub async fn update_user(
     AuthUser(claims): AuthUser,
     Path(id): Path<Uuid>,
     Json(payload): Json<UpdateUserReq>,
-) -> Result<impl IntoResponse, AppError> {
+) -> Result<Json<UserResponse>, AppError> {
     require_role(&claims, &[UserRole::Admin])?;
 
     let mut existing = sqlx::query_as::<_, User>(
@@ -140,7 +139,7 @@ pub async fn delete_user(
     State(state): State<AppState>,
     AuthUser(claims): AuthUser,
     Path(id): Path<Uuid>,
-) -> Result<impl IntoResponse, AppError> {
+) -> Result<Json<serde_json::Value>, AppError> {
     require_role(&claims, &[UserRole::Admin])?;
 
     // Soft delete (deactivate)

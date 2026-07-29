@@ -1,12 +1,12 @@
 use axum::{
-    routing::{get, patch, post, put},
     Router,
+    routing::{get, patch, post, put},
 };
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::services::ServeDir;
 
 use crate::handlers::{
-    auth::{get_me, login, logout, AppState},
+    auth::{AppState, get_me, login, logout},
     category::{create_category, delete_category, list_categories, update_category},
     menu_item::{
         create_menu_item, delete_menu_item, list_all_menu_items, list_menu, update_menu_item,
@@ -77,11 +77,11 @@ pub fn create_router(state: AppState) -> Router {
         )
         .route("/webhooks/stripe", post(handle_stripe_webhook))
         // SSE Real-time Events
-        .route("/events", get(sse_handler));
+        .route("/events", get(sse_handler))
+        .with_state(state.clone());
 
     Router::new()
         .nest("/api", api_routes)
         .nest_service("/uploads", ServeDir::new(&state.config.upload_dir))
         .layer(cors)
-        .with_state(state)
 }

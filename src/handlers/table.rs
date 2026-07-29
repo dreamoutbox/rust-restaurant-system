@@ -1,7 +1,6 @@
 use axum::{
     extract::{Path, State},
     http::{header, HeaderMap, StatusCode},
-    response::IntoResponse,
     Json,
 };
 use qrcode::render::svg;
@@ -21,7 +20,7 @@ use super::auth::AppState;
 pub async fn list_tables(
     State(state): State<AppState>,
     AuthUser(claims): AuthUser,
-) -> Result<impl IntoResponse, AppError> {
+) -> Result<Json<Vec<TableWithStatus>>, AppError> {
     // Accessible by all authenticated staff
     require_role(
         &claims,
@@ -74,7 +73,7 @@ pub async fn create_table(
     State(state): State<AppState>,
     AuthUser(claims): AuthUser,
     Json(payload): Json<CreateTableReq>,
-) -> Result<impl IntoResponse, AppError> {
+) -> Result<(StatusCode, Json<Table>), AppError> {
     require_role(&claims, &[UserRole::Admin])?;
 
     let table = sqlx::query_as::<_, Table>(
@@ -106,7 +105,7 @@ pub async fn update_table(
     AuthUser(claims): AuthUser,
     Path(id): Path<Uuid>,
     Json(payload): Json<UpdateTableReq>,
-) -> Result<impl IntoResponse, AppError> {
+) -> Result<Json<Table>, AppError> {
     require_role(&claims, &[UserRole::Admin])?;
 
     let mut existing = sqlx::query_as::<_, Table>(
@@ -152,7 +151,7 @@ pub async fn delete_table(
     State(state): State<AppState>,
     AuthUser(claims): AuthUser,
     Path(id): Path<Uuid>,
-) -> Result<impl IntoResponse, AppError> {
+) -> Result<Json<serde_json::Value>, AppError> {
     require_role(&claims, &[UserRole::Admin])?;
 
     sqlx::query("UPDATE tables SET is_active = false, updated_at = now() WHERE id = $1")
@@ -167,7 +166,7 @@ pub async fn open_table(
     State(state): State<AppState>,
     AuthUser(claims): AuthUser,
     Path(table_id): Path<Uuid>,
-) -> Result<impl IntoResponse, AppError> {
+) -> Result<Json<serde_json::Value>, AppError> {
     require_role(&claims, &[UserRole::Admin, UserRole::Cashier])?;
 
     // Check if table is active
@@ -225,7 +224,7 @@ pub async fn close_table(
     State(state): State<AppState>,
     AuthUser(claims): AuthUser,
     Path(table_id): Path<Uuid>,
-) -> Result<impl IntoResponse, AppError> {
+) -> Result<Json<serde_json::Value>, AppError> {
     require_role(&claims, &[UserRole::Admin, UserRole::Cashier])?;
 
     let active_order = sqlx::query!(
@@ -250,7 +249,7 @@ pub async fn close_table(
 pub async fn get_table_qr(
     State(state): State<AppState>,
     Path(table_id): Path<Uuid>,
-) -> Result<impl IntoResponse, AppError> {
+) -> Result<(HeaderMap, String), AppError> {
     let order = sqlx::query!(
         "SELECT session_token FROM orders WHERE table_id = $1 AND status IN ('open', 'checkout_pending')",
         table_id
