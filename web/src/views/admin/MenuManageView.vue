@@ -45,14 +45,18 @@
               </td>
               <td class="price">${{ formatCents(item.price) }}</td>
               <td>
-                <button
-                  :class="['toggle-btn', item.is_available ? 'active' : 'inactive']"
-                  @click="toggleAvailability(item)"
-                >
-                  {{ item.is_available ? 'Available' : 'Unavailable' }}
-                </button>
+                <span :class="['status-dot', item.is_available ? 'active' : 'inactive']"></span>
+                <span :class="item.is_available ? 'text-available' : 'text-unavailable'">
+                  {{ item.is_available ? 'Available' : 'Sold Out' }}
+                </span>
               </td>
               <td class="action-cell">
+                <button
+                  :class="['sm-btn', item.is_available ? 'btn-secondary' : 'btn-success']"
+                  @click="toggleAvailability(item)"
+                >
+                  {{ item.is_available ? 'Mark Sold Out' : 'Mark Available' }}
+                </button>
                 <button class="btn-secondary sm-btn" @click="openEditItemModal(item)">
                   ✏️ Edit
                 </button>
@@ -376,14 +380,30 @@ onMounted(() => {
   font-weight: 700;
 }
 
-.toggle-btn.active {
-  background: rgba(16, 185, 129, 0.2);
-  color: #34d399;
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.4rem;
 }
 
-.toggle-btn.inactive {
-  background: rgba(239, 68, 68, 0.2);
+.status-dot.active {
+  background: var(--accent);
+}
+
+.status-dot.inactive {
+  background: var(--danger);
+}
+
+.text-available {
+  color: #34d399;
+  font-weight: 600;
+}
+
+.text-unavailable {
   color: #f87171;
+  font-weight: 600;
 }
 
 .action-cell {
