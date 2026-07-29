@@ -3,6 +3,10 @@
     <div class="table-detail-wrapper">
       <div class="top-nav">
         <button class="btn-secondary" @click="router.push('/cashier')">← Back to Tables</button>
+        <span :class="['live-indicator', { active: isConnected }]">
+          <span class="pulse-dot"></span>
+          {{ isConnected ? 'Live SSE Connected' : 'Connecting SSE...' }}
+        </span>
       </div>
 
       <div v-if="loading" class="card">
@@ -85,25 +89,16 @@
               <div class="payment-methods" v-if="activeOrderDetail.status !== 'paid'">
                 <h4>Process Payment</h4>
                 <div class="pay-btn-group">
-                  <button
-                    class="btn-success pay-btn"
-                    :disabled="processing || activeOrderDetail.items.length === 0"
-                    @click="handleManualPayment('cash')"
-                  >
+                  <button class="btn-success pay-btn" :disabled="processing || activeOrderDetail.items.length === 0"
+                    @click="handleManualPayment('cash')">
                     💵 Cash Payment
                   </button>
-                  <button
-                    class="btn-primary pay-btn"
-                    :disabled="processing || activeOrderDetail.items.length === 0"
-                    @click="handleManualPayment('card')"
-                  >
+                  <button class="btn-primary pay-btn" :disabled="processing || activeOrderDetail.items.length === 0"
+                    @click="handleManualPayment('card')">
                     💳 Card POS
                   </button>
-                  <button
-                    class="btn-secondary pay-btn"
-                    :disabled="processing || activeOrderDetail.items.length === 0"
-                    @click="handleStripePayment"
-                  >
+                  <button class="btn-secondary pay-btn" :disabled="processing || activeOrderDetail.items.length === 0"
+                    @click="handleStripePayment">
                     ⚡ Stripe Checkout
                   </button>
                 </div>
@@ -126,6 +121,7 @@ import { useRoute, useRouter } from 'vue-router';
 import AppLayout from '../../components/AppLayout.vue';
 import StatusBadge from '../../components/StatusBadge.vue';
 import { api } from '../../composables/useApi.ts';
+import { useSse } from '../../composables/useSse.ts';
 
 const route = useRoute();
 const router = useRouter();
@@ -135,6 +131,11 @@ const table = ref<any>(null);
 const activeOrderDetail = ref<any>(null);
 const loading = ref(true);
 const processing = ref(false);
+
+const { isConnected, connect } = useSse((event) => {
+  console.log('SSE update in TableDetailView:', event);
+  fetchTableData();
+});
 
 const customerOrderUrl = computed(() => {
   if (!table.value?.active_session_token) return '';
@@ -222,6 +223,7 @@ async function handleStripePayment() {
 
 onMounted(() => {
   fetchTableData();
+  connect();
 });
 </script>
 
@@ -230,6 +232,53 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.live-indicator.active {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.4;
+  }
 }
 
 .detail-grid {
