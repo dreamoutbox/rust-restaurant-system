@@ -51,15 +51,15 @@
                 </span>
               </td>
               <td class="action-cell">
-                <button
-                  :class="['sm-btn', item.is_available ? 'btn-secondary' : 'btn-success']"
-                  @click="toggleAvailability(item)"
-                >
+                <button :class="['sm-btn', item.is_available ? 'btn-secondary' : 'btn-success']"
+                  @click="toggleAvailability(item)">
                   {{ item.is_available ? 'Mark Sold Out' : 'Mark Available' }}
                 </button>
+
                 <button class="btn-secondary sm-btn" @click="openEditItemModal(item)">
                   ✏️ Edit
                 </button>
+
                 <button class="btn-danger sm-btn" @click="deleteMenuItem(item)">
                   🗑️ Delete
                 </button>
@@ -111,14 +111,8 @@
 
             <div class="form-group">
               <label>Price ($ USD)</label>
-              <input
-                v-model.number="itemForm.priceDollars"
-                type="number"
-                step="0.01"
-                min="0"
-                class="form-input"
-                required
-              />
+              <input v-model.number="itemForm.priceDollars" type="number" step="0.01" min="0" class="form-input"
+                required />
             </div>
 
             <div class="form-group">
@@ -408,7 +402,7 @@ onMounted(() => {
 
 .action-cell {
   display: flex;
-  gap: 0.5rem;
+  gap: 10px;
 }
 
 .sm-btn {
@@ -444,5 +438,9 @@ onMounted(() => {
   justify-content: flex-end;
   gap: 0.75rem;
   margin-top: 1rem;
+}
+
+td {
+  height: 80px;
 }
 </style>

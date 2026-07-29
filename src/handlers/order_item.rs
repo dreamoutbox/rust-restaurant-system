@@ -1,14 +1,14 @@
 use axum::{
+    Json,
     extract::{Path, State},
     response::IntoResponse,
-    Json,
 };
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::{
     error::AppError,
-    middleware::auth::{require_role, AuthUser},
+    middleware::auth::{AuthUser, require_role},
     models::order_item::UpdateOrderItemStatusReq,
     models::user::UserRole,
     sse::SseEvent,
