@@ -58,7 +58,7 @@ pub async fn get_customer_session_menu(
             m.sort_order
         FROM menu_items m
         JOIN categories c ON c.id = m.category_id
-        WHERE m.is_available = true AND c.is_active = true
+        WHERE m.is_available = true AND m.deleted_at IS NULL AND c.is_active = true
         ORDER BY c.sort_order ASC, m.sort_order ASC, m.name ASC
         "#
     )

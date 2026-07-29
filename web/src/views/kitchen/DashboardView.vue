@@ -13,20 +13,54 @@
         </div>
       </div>
 
+      <!-- Filter Tabs Bar -->
+      <div class="filter-tabs glass">
+        <button
+          :class="['tab-btn', { active: activeFilter === 'cooking' }]"
+          @click="activeFilter = 'cooking'"
+        >
+          Cooking Queue 🔥 ({{ countByStatus('pending') + countByStatus('preparing') }})
+        </button>
+        <button
+          :class="['tab-btn', { active: activeFilter === 'pending' }]"
+          @click="activeFilter = 'pending'"
+        >
+          Pending ({{ countByStatus('pending') }})
+        </button>
+        <button
+          :class="['tab-btn', { active: activeFilter === 'preparing' }]"
+          @click="activeFilter = 'preparing'"
+        >
+          Preparing 🔥 ({{ countByStatus('preparing') }})
+        </button>
+        <button
+          :class="['tab-btn', { active: activeFilter === 'finished' }]"
+          @click="activeFilter = 'finished'"
+        >
+          Finished ✅ ({{ countByStatus('finished') }})
+        </button>
+        <button
+          :class="['tab-btn', { active: activeFilter === 'all' }]"
+          @click="activeFilter = 'all'"
+        >
+          All Items ({{ allItems.length }})
+        </button>
+      </div>
+
       <div v-if="loading" class="card">
         <p>Loading order queue...</p>
       </div>
 
-      <div v-else-if="kitchenItems.length === 0" class="empty-kitchen card">
+      <div v-else-if="filteredItems.length === 0" class="empty-kitchen card">
         <span class="icon">👨‍🍳</span>
-        <h3>Kitchen Queue is Clear!</h3>
-        <p>No pending or preparing dishes at the moment.</p>
+        <h3>No Dishes in Selected Filter</h3>
+        <p>Kitchen queue is clear for this filter category.</p>
       </div>
 
       <!-- Grouped by Table -->
       <div v-else class="grid-cards">
         <div
-          v-for="item in kitchenItems"
+          v-for="item in filteredItems"
           :key="item.id"
           :class="['kitchen-card card', `status-${item.status}`]"
         >
@@ -81,7 +115,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import AppLayout from '../../components/AppLayout.vue';
 import StatusBadge from '../../components/StatusBadge.vue';
 import { api } from '../../composables/useApi.ts';
@@ -99,8 +133,9 @@ interface KitchenItem {
   created_at: string;
 }
 
-const kitchenItems = ref<KitchenItem[]>([]);
+const allItems = ref<KitchenItem[]>([]);
 const loading = ref(true);
+const activeFilter = ref<string>('cooking');
 
 const { isConnected, connect } = useSse((event) => {
   // Real-time SSE updates
@@ -108,6 +143,26 @@ const { isConnected, connect } = useSse((event) => {
     fetchQueue();
   }
 });
+
+const filteredItems = computed(() => {
+  if (activeFilter.value === 'cooking') {
+    return allItems.value.filter((i) => i.status === 'pending' || i.status === 'preparing');
+  }
+  if (activeFilter.value === 'pending') {
+    return allItems.value.filter((i) => i.status === 'pending');
+  }
+  if (activeFilter.value === 'preparing') {
+    return allItems.value.filter((i) => i.status === 'preparing');
+  }
+  if (activeFilter.value === 'finished') {
+    return allItems.value.filter((i) => i.status === 'finished');
+  }
+  return allItems.value;
+});
+
+function countByStatus(status: string) {
+  return allItems.value.filter((i) => i.status === status).length;
+}
 
 async function fetchQueue() {
   try {
@@ -117,14 +172,11 @@ async function fetchQueue() {
     const items: KitchenItem[] = [];
     allOrders.forEach((ord: any) => {
       ord.items.forEach((item: any) => {
-        // Kitchen cares about pending and preparing items
-        if (['pending', 'preparing'].includes(item.status)) {
-          items.push(item);
-        }
+        items.push(item);
       });
     });
 
-    kitchenItems.value = items;
+    allItems.value = items;
   } catch (err) {
     console.error('Error fetching kitchen queue', err);
   } finally {
@@ -162,6 +214,28 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.tab-btn {
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  padding: 0.45rem 0.9rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.tab-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
 }
 
 .sse-status {

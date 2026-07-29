@@ -49,7 +49,7 @@
                   :class="['toggle-btn', item.is_available ? 'active' : 'inactive']"
                   @click="toggleAvailability(item)"
                 >
-                  {{ item.is_available ? 'Available' : 'Sold Out' }}
+                  {{ item.is_available ? 'Available' : 'Unavailable' }}
                 </button>
               </td>
               <td class="action-cell">

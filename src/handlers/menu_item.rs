@@ -33,7 +33,7 @@ pub async fn list_menu(State(state): State<AppState>) -> Result<impl IntoRespons
             m.sort_order
         FROM menu_items m
         JOIN categories c ON c.id = m.category_id
-        WHERE m.is_available = true AND c.is_active = true
+        WHERE m.is_available = true AND m.deleted_at IS NULL AND c.is_active = true
         ORDER BY c.sort_order ASC, m.sort_order ASC, m.name ASC
         "#
     )
@@ -81,6 +81,7 @@ pub async fn list_all_menu_items(
             m.sort_order
         FROM menu_items m
         JOIN categories c ON c.id = m.category_id
+        WHERE m.deleted_at IS NULL
         ORDER BY c.sort_order ASC, m.sort_order ASC, m.name ASC
         "#
     )
@@ -121,7 +122,7 @@ pub async fn create_menu_item(
         r#"
         INSERT INTO menu_items (category_id, name, description, price, image_path, sort_order)
         VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING id, category_id, name, description, price, image_path, is_available, sort_order, created_at, updated_at
+        RETURNING id, category_id, name, description, price, image_path, is_available, sort_order, deleted_at, created_at, updated_at
         "#,
     )
     .bind(payload.category_id)
@@ -147,55 +148,35 @@ pub async fn update_menu_item(
         &[UserRole::Admin, UserRole::Cashier, UserRole::Kitchen],
     )?;
 
-    let mut existing = sqlx::query_as::<_, MenuItem>(
-        "SELECT id, category_id, name, description, price, image_path, is_available, sort_order, created_at, updated_at FROM menu_items WHERE id = $1",
-    )
-    .bind(id)
-    .fetch_one(&state.db)
-    .await?;
-
-    if let Some(category_id) = payload.category_id {
-        existing.category_id = category_id;
-    }
-    if let Some(name) = payload.name {
-        existing.name = name;
-    }
-    if let Some(description) = payload.description {
-        existing.description = Some(description);
-    }
-    if let Some(price) = payload.price {
-        existing.price = price;
-    }
-    if let Some(image_path) = payload.image_path {
-        existing.image_path = Some(image_path);
-    }
-    if let Some(is_available) = payload.is_available {
-        existing.is_available = is_available;
-    }
-    if let Some(sort_order) = payload.sort_order {
-        existing.sort_order = sort_order;
-    }
-
-    let updated = sqlx::query_as::<_, MenuItem>(
+    let item = sqlx::query_as::<_, MenuItem>(
         r#"
         UPDATE menu_items
-        SET category_id = $1, name = $2, description = $3, price = $4, image_path = $5, is_available = $6, sort_order = $7, updated_at = now()
-        WHERE id = $8
-        RETURNING id, category_id, name, description, price, image_path, is_available, sort_order, created_at, updated_at
+        SET
+            category_id = COALESCE($1, category_id),
+            name = COALESCE($2, name),
+            description = COALESCE($3, description),
+            price = COALESCE($4, price),
+            image_path = COALESCE($5, image_path),
+            is_available = COALESCE($6, is_available),
+            sort_order = COALESCE($7, sort_order),
+            updated_at = now()
+        WHERE id = $8 AND deleted_at IS NULL
+        RETURNING id, category_id, name, description, price, image_path, is_available, sort_order, deleted_at, created_at, updated_at
         "#,
     )
-    .bind(existing.category_id)
-    .bind(&existing.name)
-    .bind(&existing.description)
-    .bind(existing.price)
-    .bind(&existing.image_path)
-    .bind(existing.is_available)
-    .bind(existing.sort_order)
+    .bind(payload.category_id)
+    .bind(&payload.name)
+    .bind(&payload.description)
+    .bind(payload.price)
+    .bind(&payload.image_path)
+    .bind(payload.is_available)
+    .bind(payload.sort_order)
     .bind(id)
-    .fetch_one(&state.db)
-    .await?;
+    .fetch_optional(&state.db)
+    .await?
+    .ok_or_else(|| AppError::NotFound("Menu item not found".to_string()))?;
 
-    Ok(Json(updated))
+    Ok(Json(item))
 }
 
 pub async fn delete_menu_item(
@@ -208,13 +189,13 @@ pub async fn delete_menu_item(
         &[UserRole::Admin, UserRole::Cashier, UserRole::Kitchen],
     )?;
 
-    sqlx::query("UPDATE menu_items SET is_available = false, updated_at = now() WHERE id = $1")
+    sqlx::query("UPDATE menu_items SET deleted_at = now(), updated_at = now() WHERE id = $1")
         .bind(id)
         .execute(&state.db)
         .await?;
 
     Ok(Json(
-        json!({ "message": "Menu item deactivated successfully" }),
+        json!({ "message": "Menu item deleted successfully" }),
     ))
 }
 

@@ -12,6 +12,7 @@ pub struct MenuItem {
     pub image_path: Option<String>,
     pub is_available: bool,
     pub sort_order: i32,
+    pub deleted_at: Option<DateTime<Utc>>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
