@@ -183,3 +183,63 @@ button {
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.25rem;
 }
+
+/* Print styles for thermal paper receipt printing */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Hide navbar, page layout, background grid, and modal chrome */
+  header,
+  nav,
+  .navbar,
+  .page-header,
+  .filters-bar,
+  .orders-grid,
+  .modal-header,
+  .modal-footer,
+  .main-content > *:not(.orders-wrapper),
+  .orders-wrapper > *:not(.modal-backdrop),
+  button {
+    display: none !important;
+  }
+
+  .modal-backdrop {
+    position: static !important;
+    background: none !important;
+    padding: 0 !important;
+    display: block !important;
+    inset: auto !important;
+  }
+
+  .receipt-modal {
+    box-shadow: none !important;
+    border: none !important;
+    background: #ffffff !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .receipt-content {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 80mm !important;
+    font-family: monospace !important;
+  }
+
+  .divider {
+    border-bottom: 1px dashed #000000 !important;
+  }
+
+  .total-price {
+    color: #000000 !important;
+  }
+}
+

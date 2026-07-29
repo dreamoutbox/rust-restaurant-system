@@ -60,6 +60,12 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/admin/MenuManageView.vue'),
     meta: { roles: ['admin', 'cashier', 'kitchen'] },
   },
+  {
+    path: '/orders',
+    name: 'orders-list',
+    component: () => import('../views/orders/OrdersView.vue'),
+    meta: { roles: ['admin', 'cashier', 'kitchen', 'waiter'] },
+  },
 ];
 
 const router = createRouter({

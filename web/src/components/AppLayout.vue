@@ -33,6 +33,14 @@
         </router-link>
 
         <router-link
+          v-if="['admin', 'cashier', 'kitchen', 'waiter'].includes(authStore.role || '')"
+          to="/orders"
+          class="nav-item"
+        >
+          Orders
+        </router-link>
+
+        <router-link
           v-if="['admin', 'cashier', 'kitchen'].includes(authStore.role || '')"
           to="/admin/menu"
           class="nav-item"
