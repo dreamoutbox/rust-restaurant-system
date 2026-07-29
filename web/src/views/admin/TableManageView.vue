@@ -7,7 +7,7 @@
           <p>Configure physical dining tables and manage active/deactivated states</p>
         </div>
 
-        <button class="btn-primary" @click="showAddModal = true">+ Add New Table</button>
+        <button class="btn-primary" @click="openAddModal">+ Add New Table</button>
       </div>
 
       <!-- Filter Tabs -->
@@ -58,6 +58,9 @@
           <p class="name">{{ t.name }}</p>
 
           <div class="card-actions">
+            <button class="btn-secondary sm-btn" @click="openEditModal(t)">
+              ✏️ Edit
+            </button>
             <button
               v-if="t.is_active"
               class="btn-danger sm-btn"
@@ -70,18 +73,18 @@
               class="btn-success sm-btn"
               @click="toggleTableActive(t, true)"
             >
-              ✨ Reactivate Table
+              ✨ Reactivate
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Add Table Modal -->
-      <div v-if="showAddModal" class="modal-backdrop" @click.self="showAddModal = false">
+      <!-- Add / Edit Table Modal -->
+      <div v-if="showModal" class="modal-backdrop" @click.self="showModal = false">
         <div class="modal-card glass">
-          <h3>Add Dining Table</h3>
+          <h3>{{ editingTableId ? 'Edit Dining Table' : 'Add Dining Table' }}</h3>
 
-          <form @submit.prevent="createTable">
+          <form @submit.prevent="saveTable">
             <div class="form-group">
               <label>Table Number</label>
               <input v-model.number="form.table_number" type="number" class="form-input" required />
@@ -98,8 +101,10 @@
             </div>
 
             <div class="modal-actions">
-              <button type="button" class="btn-secondary" @click="showAddModal = false">Cancel</button>
-              <button type="submit" class="btn-primary">Add Table</button>
+              <button type="button" class="btn-secondary" @click="showModal = false">Cancel</button>
+              <button type="submit" class="btn-primary" :disabled="submitting">
+                {{ submitting ? 'Saving...' : (editingTableId ? 'Update Table' : 'Add Table') }}
+              </button>
             </div>
           </form>
         </div>
@@ -115,7 +120,9 @@ import { api } from '../../composables/useApi.ts';
 
 const tables = ref<any[]>([]);
 const loading = ref(true);
-const showAddModal = ref(false);
+const showModal = ref(false);
+const editingTableId = ref<string | null>(null);
+const submitting = ref(false);
 const filter = ref<'all' | 'active' | 'inactive'>('all');
 
 const form = ref({
@@ -145,14 +152,40 @@ async function fetchTables() {
   }
 }
 
-async function createTable() {
+function openAddModal() {
+  editingTableId.value = null;
+  form.value = {
+    table_number: tables.value.length + 1,
+    name: '',
+    capacity: 4,
+  };
+  showModal.value = true;
+}
+
+function openEditModal(t: any) {
+  editingTableId.value = t.id;
+  form.value = {
+    table_number: t.table_number,
+    name: t.name,
+    capacity: t.capacity || 4,
+  };
+  showModal.value = true;
+}
+
+async function saveTable() {
+  submitting.value = true;
   try {
-    await api.post('/tables', form.value);
-    showAddModal.value = false;
-    form.value = { table_number: tables.value.length + 1, name: '', capacity: 4 };
+    if (editingTableId.value) {
+      await api.put(`/tables/${editingTableId.value}`, form.value);
+    } else {
+      await api.post('/tables', form.value);
+    }
+    showModal.value = false;
     await fetchTables();
   } catch (err: any) {
-    alert(err.response?.data?.error || 'Failed to add table.');
+    alert(err.response?.data?.error || 'Failed to save table.');
+  } finally {
+    submitting.value = false;
   }
 }
 
@@ -269,11 +302,15 @@ onMounted(() => {
   font-weight: 600;
 }
 
-.sm-btn {
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
   margin-top: 0.5rem;
+}
+
+.sm-btn {
   padding: 0.35rem 0.75rem;
   font-size: 0.8rem;
-  align-self: flex-start;
 }
 
 .modal-backdrop {
