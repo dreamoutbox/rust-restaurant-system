@@ -391,8 +391,8 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # Stripe
-async-stripe = "=v1.0.0-rc.6"
-async-stripe-core = { version = "=v1.0.0-rc.6", features = ["customer"] }
+async-stripe = "=1.0.0-rc.6"
+async-stripe-core = { version = "=1.0.0-rc.6", features = ["customer"] }
 ```
 
 ---
