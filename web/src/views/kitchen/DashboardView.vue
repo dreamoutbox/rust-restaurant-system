@@ -48,21 +48,30 @@
             Received: {{ formatTime(item.created_at) }}
           </div>
 
-          <div class="action-buttons">
+          <div class="status-btn-group">
             <button
-              v-if="item.status === 'pending'"
-              class="btn-primary flex-1"
+              :class="['status-btn', { active: item.status === 'pending' }]"
+              @click="updateStatus(item.id, 'pending')"
+            >
+              Pending
+            </button>
+            <button
+              :class="['status-btn', { active: item.status === 'preparing' }]"
               @click="updateStatus(item.id, 'preparing')"
             >
-              Start Cooking 🔥
+              Preparing 🔥
             </button>
-
             <button
-              v-if="item.status === 'preparing'"
-              class="btn-success flex-1"
+              :class="['status-btn', { active: item.status === 'finished' }]"
               @click="updateStatus(item.id, 'finished')"
             >
-              Mark Finished ✅
+              Finished ✅
+            </button>
+            <button
+              :class="['status-btn', { active: item.status === 'served' }]"
+              @click="updateStatus(item.id, 'served')"
+            >
+              Served 🛎️
             </button>
           </div>
         </div>
@@ -252,10 +261,28 @@ onMounted(() => {
   color: var(--text-muted);
 }
 
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
+.status-btn-group {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
   margin-top: 0.5rem;
+}
+
+.status-btn {
+  background: var(--bg-dark);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  font-weight: 700;
 }
 
 .flex-1 {

@@ -3,8 +3,8 @@
     <div class="waiter-wrapper">
       <div class="header-bar">
         <div>
-          <h1>Waiter Terminal — Ready to Serve</h1>
-          <p>Dishes finished by kitchen waiting for delivery</p>
+          <h1>Waiter Terminal — Table Service</h1>
+          <p>Monitor order items and update status (Pending → Preparing → Finished → Served)</p>
         </div>
 
         <div class="sse-status" :class="{ connected: isConnected }">
@@ -13,22 +13,46 @@
         </div>
       </div>
 
-      <div v-if="loading" class="card">
-        <p>Loading ready dishes...</p>
+      <!-- Filter Tabs -->
+      <div class="filter-tabs glass">
+        <button
+          :class="['tab-btn', { active: activeFilter === 'finished' }]"
+          @click="activeFilter = 'finished'"
+        >
+          Ready to Serve 🛎️ ({{ countByStatus('finished') }})
+        </button>
+        <button
+          :class="['tab-btn', { active: activeFilter === 'active' }]"
+          @click="activeFilter = 'active'"
+        >
+          Cooking 🔥 ({{ countByStatus('preparing') + countByStatus('pending') }})
+        </button>
+        <button
+          :class="['tab-btn', { active: activeFilter === 'served' }]"
+          @click="activeFilter = 'served'"
+        >
+          Served ✅ ({{ countByStatus('served') }})
+        </button>
+        <button
+          :class="['tab-btn', { active: activeFilter === 'all' }]"
+          @click="activeFilter = 'all'"
+        >
+          All Items ({{ allItems.length }})
+        </button>
       </div>
 
-      <div v-else-if="finishedItems.length === 0" class="empty-waiter card">
+      <div v-if="loading" class="card">
+        <p>Loading dishes status...</p>
+      </div>
+
+      <div v-else-if="filteredItems.length === 0" class="empty-waiter card">
         <span class="icon">🛎️</span>
-        <h3>No Dishes Ready to Serve</h3>
-        <p>All cooked items have been delivered to tables.</p>
+        <h3>No Dishes in Selected Filter</h3>
+        <p>Queue is clear for this status category.</p>
       </div>
 
       <div v-else class="grid-cards">
-        <div
-          v-for="item in finishedItems"
-          :key="item.id"
-          class="waiter-card card"
-        >
+        <div v-for="item in filteredItems" :key="item.id" class="waiter-card card">
           <div class="card-header">
             <span class="table-tag">Table {{ item.table_number }}</span>
             <StatusBadge :status="item.status" />
@@ -43,12 +67,33 @@
             Note: {{ item.note }}
           </div>
 
-          <button
-            class="btn-success serve-btn"
-            @click="markServed(item.id)"
-          >
-            Mark as Served 🛎️
-          </button>
+          <!-- All status control buttons for revert/misclick handling -->
+          <div class="status-btn-group">
+            <button
+              :class="['status-btn', { active: item.status === 'pending' }]"
+              @click="updateItemStatus(item.id, 'pending')"
+            >
+              Pending
+            </button>
+            <button
+              :class="['status-btn', { active: item.status === 'preparing' }]"
+              @click="updateItemStatus(item.id, 'preparing')"
+            >
+              Preparing 🔥
+            </button>
+            <button
+              :class="['status-btn', { active: item.status === 'finished' }]"
+              @click="updateItemStatus(item.id, 'finished')"
+            >
+              Finished ✅
+            </button>
+            <button
+              :class="['status-btn', { active: item.status === 'served' }]"
+              @click="updateItemStatus(item.id, 'served')"
+            >
+              Served 🛎️
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -56,7 +101,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import AppLayout from '../../components/AppLayout.vue';
 import StatusBadge from '../../components/StatusBadge.vue';
 import { api } from '../../composables/useApi.ts';
@@ -74,16 +119,34 @@ interface WaiterItem {
   created_at: string;
 }
 
-const finishedItems = ref<WaiterItem[]>([]);
+const allItems = ref<WaiterItem[]>([]);
 const loading = ref(true);
+const activeFilter = ref<string>('finished');
 
 const { isConnected, connect } = useSse((event) => {
   if (event.type === 'item_status_changed' || event.type === 'new_order_items') {
-    fetchFinishedQueue();
+    fetchOrdersQueue();
   }
 });
 
-async function fetchFinishedQueue() {
+const filteredItems = computed(() => {
+  if (activeFilter.value === 'finished') {
+    return allItems.value.filter((i) => i.status === 'finished');
+  }
+  if (activeFilter.value === 'active') {
+    return allItems.value.filter((i) => i.status === 'pending' || i.status === 'preparing');
+  }
+  if (activeFilter.value === 'served') {
+    return allItems.value.filter((i) => i.status === 'served');
+  }
+  return allItems.value;
+});
+
+function countByStatus(status: string) {
+  return allItems.value.filter((i) => i.status === status).length;
+}
+
+async function fetchOrdersQueue() {
   try {
     const res = await api.get('/orders');
     const allOrders = res.data;
@@ -91,13 +154,11 @@ async function fetchFinishedQueue() {
     const items: WaiterItem[] = [];
     allOrders.forEach((ord: any) => {
       ord.items.forEach((item: any) => {
-        if (item.status === 'finished') {
-          items.push(item);
-        }
+        items.push(item);
       });
     });
 
-    finishedItems.value = items;
+    allItems.value = items;
   } catch (err) {
     console.error('Error fetching waiter items', err);
   } finally {
@@ -105,17 +166,17 @@ async function fetchFinishedQueue() {
   }
 }
 
-async function markServed(itemId: string) {
+async function updateItemStatus(itemId: string, status: string) {
   try {
-    await api.patch(`/order-items/${itemId}/status`, { status: 'served' });
-    await fetchFinishedQueue();
+    await api.patch(`/order-items/${itemId}/status`, { status });
+    await fetchOrdersQueue();
   } catch (err: any) {
-    alert(err.response?.data?.error || 'Failed to mark as served.');
+    alert(err.response?.data?.error || 'Failed to update item status.');
   }
 }
 
 onMounted(() => {
-  fetchFinishedQueue();
+  fetchOrdersQueue();
   connect();
 });
 </script>
@@ -131,6 +192,28 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.tab-btn {
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  padding: 0.45rem 0.9rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.tab-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
 }
 
 .sse-status {
@@ -214,9 +297,27 @@ onMounted(() => {
   color: var(--text-muted);
 }
 
-.serve-btn {
-  width: 100%;
-  padding: 0.6rem;
+.status-btn-group {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
   margin-top: 0.5rem;
+}
+
+.status-btn {
+  background: var(--bg-dark);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  font-weight: 700;
 }
 </style>
