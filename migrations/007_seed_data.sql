@@ -6,10 +6,10 @@
 -- We will also handle auto-seeding/upgrading users in Rust code on startup to ensure password hash validity.
 
 INSERT INTO users (id, username, password_hash, display_name, role) VALUES
-    ('00000000-0000-0000-0000-000000000001', 'admin', '$argon2id$v=19$m=19456,t=2,p=1$c2FsdHNhbHRzYWx0c2FsdA$v/aJ5rQ1k9kX0L5m7v3+K4fQ1v8X2/j5t3+K4fQ1v8X', 'Admin User', 'admin'),
-    ('00000000-0000-0000-0000-000000000002', 'cashier1', '$argon2id$v=19$m=19456,t=2,p=1$c2FsdHNhbHRzYWx0c2FsdA$v/aJ5rQ1k9kX0L5m7v3+K4fQ1v8X2/j5t3+K4fQ1v8X', 'Cashier 1', 'cashier'),
-    ('00000000-0000-0000-0000-000000000003', 'kitchen1', '$argon2id$v=19$m=19456,t=2,p=1$c2FsdHNhbHRzYWx0c2FsdA$v/aJ5rQ1k9kX0L5m7v3+K4fQ1v8X2/j5t3+K4fQ1v8X', 'Chef Alex', 'kitchen'),
-    ('00000000-0000-0000-0000-000000000004', 'waiter1', '$argon2id$v=19$m=19456,t=2,p=1$c2FsdHNhbHRzYWx0c2FsdA$v/aJ5rQ1k9kX0L5m7v3+K4fQ1v8X2/j5t3+K4fQ1v8X', 'Waiter John', 'waiter')
+    ('00000000-0000-0000-0000-000000000001', 'admin', '$argon2id$v=19$m=19456,t=2,p=1$Z9K6WbZwgGhC5dgtkNBoLA$hzyyO2HS/vBHpJdTzrGZOGKH7B6flwzAYxgzBsF4p10', 'Admin User', 'admin'),
+    ('00000000-0000-0000-0000-000000000002', 'cashier1', '$argon2id$v=19$m=19456,t=2,p=1$p9LTw1QwQcz3lkrPxLRDyQ$0E6VAreKUp++6aIxzYBKojUQ3a6D/c/XUksWYW+9awI', 'Cashier 1', 'cashier'),
+    ('00000000-0000-0000-0000-000000000003', 'kitchen1', '$argon2id$v=19$m=19456,t=2,p=1$p9LTw1QwQcz3lkrPxLRDyQ$0E6VAreKUp++6aIxzYBKojUQ3a6D/c/XUksWYW+9awI', 'Chef Alex', 'kitchen'),
+    ('00000000-0000-0000-0000-000000000004', 'waiter1', '$argon2id$v=19$m=19456,t=2,p=1$p9LTw1QwQcz3lkrPxLRDyQ$0E6VAreKUp++6aIxzYBKojUQ3a6D/c/XUksWYW+9awI', 'Waiter John', 'waiter')
 ON CONFLICT (username) DO NOTHING;
 
 -- Seed Tables (Tables 1 - 8)
