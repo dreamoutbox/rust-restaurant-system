@@ -71,7 +71,7 @@ async function fetchTables() {
   try {
     loading.value = true;
     const res = await api.get('/tables');
-    tables.value = res.data;
+    tables.value = res.data.filter((t: any) => t.is_active);
   } catch (err: any) {
     console.error('Failed to fetch tables', err);
   } finally {

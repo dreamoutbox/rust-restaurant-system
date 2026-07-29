@@ -4,25 +4,75 @@
       <div class="header-bar">
         <div>
           <h1>Table Setup & Management</h1>
-          <p>Configure physical restaurant dining tables</p>
+          <p>Configure physical dining tables and manage active/deactivated states</p>
         </div>
 
         <button class="btn-primary" @click="showAddModal = true">+ Add New Table</button>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="filter-tabs">
+        <button
+          :class="['tab-btn', { active: filter === 'all' }]"
+          @click="filter = 'all'"
+        >
+          All Tables ({{ tables.length }})
+        </button>
+        <button
+          :class="['tab-btn', { active: filter === 'active' }]"
+          @click="filter = 'active'"
+        >
+          Active ({{ activeCount }})
+        </button>
+        <button
+          :class="['tab-btn', { active: filter === 'inactive' }]"
+          @click="filter = 'inactive'"
+        >
+          Deactivated ({{ inactiveCount }})
+        </button>
       </div>
 
       <div v-if="loading" class="card">
         <p>Loading tables...</p>
       </div>
 
+      <div v-else-if="filteredTables.length === 0" class="card empty-card">
+        <p>No tables found for this filter.</p>
+      </div>
+
       <div v-else class="grid-cards">
-        <div v-for="t in tables" :key="t.id" class="card table-manage-card">
+        <div
+          v-for="t in filteredTables"
+          :key="t.id"
+          :class="['card table-manage-card', { inactive: !t.is_active }]"
+        >
           <div class="card-top">
-            <h3>Table {{ t.table_number }}</h3>
+            <div class="table-header-info">
+              <h3>Table {{ t.table_number }}</h3>
+              <span :class="['state-badge', t.is_active ? 'active' : 'inactive']">
+                {{ t.is_active ? 'Active' : 'Deactivated' }}
+              </span>
+            </div>
             <span class="capacity">👥 {{ t.capacity || 4 }} Seats</span>
           </div>
           <p class="name">{{ t.name }}</p>
 
-          <button class="btn-danger sm-btn" @click="deactivateTable(t.id)">Deactivate</button>
+          <div class="card-actions">
+            <button
+              v-if="t.is_active"
+              class="btn-danger sm-btn"
+              @click="toggleTableActive(t, false)"
+            >
+              Deactivate
+            </button>
+            <button
+              v-else
+              class="btn-success sm-btn"
+              @click="toggleTableActive(t, true)"
+            >
+              ✨ Reactivate Table
+            </button>
+          </div>
         </div>
       </div>
 
@@ -59,18 +109,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import AppLayout from '../../components/AppLayout.vue';
 import { api } from '../../composables/useApi.ts';
 
 const tables = ref<any[]>([]);
 const loading = ref(true);
 const showAddModal = ref(false);
+const filter = ref<'all' | 'active' | 'inactive'>('all');
 
 const form = ref({
   table_number: 1,
   name: '',
   capacity: 4,
+});
+
+const activeCount = computed(() => tables.value.filter((t) => t.is_active).length);
+const inactiveCount = computed(() => tables.value.filter((t) => !t.is_active).length);
+
+const filteredTables = computed(() => {
+  if (filter.value === 'active') return tables.value.filter((t) => t.is_active);
+  if (filter.value === 'inactive') return tables.value.filter((t) => !t.is_active);
+  return tables.value;
 });
 
 async function fetchTables() {
@@ -96,13 +156,19 @@ async function createTable() {
   }
 }
 
-async function deactivateTable(id: string) {
-  if (!confirm('Deactivate this table?')) return;
+async function toggleTableActive(table: any, is_active: boolean) {
+  const actionName = is_active ? 'Reactivate' : 'Deactivate';
+  if (!confirm(`${actionName} Table ${table.table_number}?`)) return;
+
   try {
-    await api.delete(`/tables/${id}`);
+    if (is_active) {
+      await api.put(`/tables/${table.id}`, { is_active: true });
+    } else {
+      await api.delete(`/tables/${table.id}`);
+    }
     await fetchTables();
   } catch (err: any) {
-    alert(err.response?.data?.error || 'Failed to deactivate table.');
+    alert(err.response?.data?.error || `Failed to ${actionName.toLowerCase()} table.`);
   }
 }
 
@@ -124,16 +190,73 @@ onMounted(() => {
   align-items: center;
 }
 
+.filter-tabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tab-btn {
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  padding: 0.45rem 0.9rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.tab-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.empty-card {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--text-muted);
+}
+
 .table-manage-card {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  transition: opacity 0.2s ease, border-color 0.2s ease;
+}
+
+.table-manage-card.inactive {
+  opacity: 0.6;
+  border-style: dashed;
 }
 
 .card-top {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
+}
+
+.table-header-info {
+  display: flex;
   align-items: center;
+  gap: 0.5rem;
+}
+
+.state-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.state-badge.active {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.state-badge.inactive {
+  background: rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
 }
 
 .capacity {
@@ -144,7 +267,6 @@ onMounted(() => {
 .name {
   font-size: 1.1rem;
   font-weight: 600;
-
 }
 
 .sm-btn {

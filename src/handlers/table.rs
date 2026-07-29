@@ -45,7 +45,6 @@ pub async fn list_tables(
             o.status as "order_status?"
         FROM tables t
         LEFT JOIN orders o ON o.table_id = t.id AND o.status IN ('open', 'checkout_pending')
-        WHERE t.is_active = true
         ORDER BY t.table_number ASC
         "#
     )
