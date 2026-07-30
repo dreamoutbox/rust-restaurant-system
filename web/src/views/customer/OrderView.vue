@@ -43,8 +43,7 @@
 
         <div class="active-order-total">
           <span>Total Order Price</span>
-          <span class="total-price">${{formatCents(activeOrder.total_amount || activeOrder.items.reduce((sum: number,
-            i: any) => sum + i.unit_price * i.quantity, 0))}}</span>
+          <span class="total-price">${{ formatCents(calculateActiveOrderTotal()) }}</span>
         </div>
       </section>
 
@@ -177,6 +176,13 @@ const categories = computed(() => {
 function formatCents(cents: number | string) {
   const c = typeof cents === 'string' ? parseInt(cents, 10) : cents;
   return ((c || 0) / 100).toFixed(2);
+}
+
+function calculateActiveOrderTotal() {
+  if (!activeOrder.value || !activeOrder.value.items) return 0;
+  return activeOrder.value.items
+    .filter((item: any) => item.status !== 'cancelled')
+    .reduce((sum: number, item: any) => sum + item.unit_price * item.quantity, 0);
 }
 
 const filteredMenuItems = computed(() => {
