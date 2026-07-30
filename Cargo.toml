@@ -3,6 +3,10 @@ name = "rust-restaurant-system"
 version = "0.1.0"
 edition = "2024"
 default-run = "rust-restaurant-system"
+description = "A full-stack, real-time restaurant management system built with Rust (Axum) and Vue 3."
+license = "MIT"
+repository = "https://github.com/dreamoutbox/rust-restaurant-system"
+homepage = "https://github.com/dreamoutbox/rust-restaurant-system"
 
 [dependencies]
 axum = { version = "0.8", features = ["multipart"] }
