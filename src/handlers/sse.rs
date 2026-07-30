@@ -29,7 +29,11 @@ pub async fn sse_handler(
     )?;
 
     let rx = state.sse.subscribe();
-    let stream = BroadcastStream::new(rx).filter_map(|res| match res {
+
+    let initial =
+        futures_util::stream::once(async { Ok(Event::default().data(r#"{"type":"connected"}"#)) });
+
+    let broadcast_stream = BroadcastStream::new(rx).filter_map(|res| match res {
         Ok(event) => {
             let json_str = serde_json::to_string(&event).unwrap_or_default();
             Some(Ok(Event::default().data(json_str)))
@@ -37,7 +41,9 @@ pub async fn sse_handler(
         Err(_) => None,
     });
 
-    Ok(Sse::new(stream).keep_alive(
+    let combined_stream = initial.chain(broadcast_stream);
+
+    Ok(Sse::new(combined_stream).keep_alive(
         axum::response::sse::KeepAlive::new()
             .interval(Duration::from_secs(15))
             .text("ping"),
