@@ -1,0 +1,62 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            t.id,\n            t.table_number,\n            t.name,\n            t.capacity,\n            t.is_active,\n            o.id as \"active_order_id?\",\n            o.session_token as \"active_session_token?\",\n            o.status as \"order_status?\"\n        FROM tables t\n        LEFT JOIN orders o ON o.table_id = t.id AND o.status IN ('open', 'checkout_pending')\n        ORDER BY t.table_number ASC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "table_number",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "capacity",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "is_active",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "active_order_id?",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 6,
+        "name": "active_session_token?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "order_status?",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "bd88780690daf6f36a68ddc640a01fb158ce47d1323b5ae199d094aa465e7224"
+}

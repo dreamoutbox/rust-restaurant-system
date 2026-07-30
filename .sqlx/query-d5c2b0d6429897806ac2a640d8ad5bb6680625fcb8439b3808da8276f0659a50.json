@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT session_token FROM orders WHERE table_id = $1 AND status IN ('open', 'checkout_pending')",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "session_token",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "d5c2b0d6429897806ac2a640d8ad5bb6680625fcb8439b3808da8276f0659a50"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE orders SET status = 'closed', closed_by = $1, closed_at = now() WHERE id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0a06630d94c6bb2f589791486f4e69377890fde1827d07523c5d2fe0b5e7ca32"
+}

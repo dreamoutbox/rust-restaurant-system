@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO tables (table_number, name, capacity)\n            VALUES ($1, $2, $3)\n            ON CONFLICT (table_number) DO NOTHING\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Varchar",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d06c4dd20bf26520b54a4c03f07182740b01fc46c8e9e52f1f8a2cb354914765"
+}

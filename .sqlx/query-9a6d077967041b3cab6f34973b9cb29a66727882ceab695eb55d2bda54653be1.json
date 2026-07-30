@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            oi.id,\n            oi.order_id,\n            t.table_number,\n            oi.menu_item_id,\n            m.name as menu_item_name,\n            oi.quantity,\n            oi.unit_price as \"unit_price!: i64\",\n            oi.note,\n            oi.status,\n            oi.created_at\n        FROM order_items oi\n        JOIN orders o ON o.id = oi.order_id\n        JOIN tables t ON t.id = o.table_id\n        JOIN menu_items m ON m.id = oi.menu_item_id\n        WHERE oi.order_id = $1\n        ORDER BY oi.created_at ASC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "order_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "table_number",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "menu_item_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "menu_item_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "quantity",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "unit_price!: i64",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 7,
+        "name": "note",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "status",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "9a6d077967041b3cab6f34973b9cb29a66727882ceab695eb55d2bda54653be1"
+}

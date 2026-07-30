@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT o.id, o.status, t.table_number, t.name as table_name\n        FROM orders o\n        JOIN tables t ON t.id = o.table_id\n        WHERE o.session_token = $1 AND o.status IN ('open', 'checkout_pending')\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "status",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "table_number",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "table_name",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "dc2d4aaf7bd62b33b0dad3d61c7eef51e7df05f7ff73c2c0de727e12fa0db0b2"
+}

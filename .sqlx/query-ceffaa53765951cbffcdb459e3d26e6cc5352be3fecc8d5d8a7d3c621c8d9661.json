@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            oi.id,\n            oi.order_id,\n            oi.status as current_status,\n            m.name as item_name,\n            t.table_number\n        FROM order_items oi\n        JOIN orders o ON o.id = oi.order_id\n        JOIN tables t ON t.id = o.table_id\n        JOIN menu_items m ON m.id = oi.menu_item_id\n        WHERE oi.id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "order_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "current_status",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "item_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "table_number",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "ceffaa53765951cbffcdb459e3d26e6cc5352be3fecc8d5d8a7d3c621c8d9661"
+}

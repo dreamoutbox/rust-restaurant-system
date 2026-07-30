@@ -1,0 +1,68 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            m.id,\n            m.category_id,\n            c.name as category_name,\n            m.name,\n            m.description,\n            m.price as \"price!: i64\",\n            m.image_path,\n            m.is_available,\n            m.sort_order\n        FROM menu_items m\n        JOIN categories c ON c.id = m.category_id\n        WHERE m.deleted_at IS NULL\n        ORDER BY c.sort_order ASC, m.sort_order ASC, m.name ASC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "category_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "category_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "price!: i64",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 6,
+        "name": "image_path",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "is_available",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 8,
+        "name": "sort_order",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "fb194d870239b38b235936a06964227e1540a5db0448b64b7fc8cf1a61e28e53"
+}
