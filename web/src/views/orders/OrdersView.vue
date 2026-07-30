@@ -22,12 +22,8 @@
       <!-- Filters Bar -->
       <div class="filters-bar glass">
         <div class="status-tabs">
-          <button
-            v-for="tab in statusTabs"
-            :key="tab.value"
-            :class="['tab-btn', { active: activeStatus === tab.value }]"
-            @click="activeStatus = tab.value"
-          >
+          <button v-for="tab in statusTabs" :key="tab.value"
+            :class="['tab-btn', { active: activeStatus === tab.value }]" @click="activeStatus = tab.value">
             {{ tab.label }}
             <span class="count-pill">{{ getStatusCount(tab.value) }}</span>
           </button>
@@ -35,12 +31,8 @@
 
         <div class="search-box">
           <span class="search-icon">🔍</span>
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Filter by table # or order ID..."
-            class="form-input search-input"
-          />
+          <input v-model="searchQuery" type="text" placeholder="Filter by table # or order ID..."
+            class="form-input search-input" />
         </div>
       </div>
 
@@ -60,11 +52,7 @@
 
       <!-- Orders List Grid -->
       <div v-else class="orders-grid">
-        <div
-          v-for="order in filteredOrders"
-          :key="order.id"
-          class="order-card card"
-        >
+        <div v-for="order in filteredOrders" :key="order.id" class="order-card card">
           <div class="card-header">
             <div class="table-info">
               <span class="table-badge">Table {{ order.table_number }}</span>
@@ -105,26 +93,20 @@
             </div>
 
             <div v-else class="items-list">
-              <div
-                v-for="item in order.items"
-                :key="item.id"
-                class="item-row"
-              >
-                <div class="item-left">
-                  <span class="item-qty">{{ item.quantity }}x</span>
-                  <span class="item-name">{{ item.menu_item_name }}</span>
-                  <span v-if="item.note" class="item-note">({{ item.note }})</span>
+              <div v-for="item in order.items" :key="item.id" class="item-row">
+                <div class="item-top">
+                  <div class="item-info">
+                    <span class="item-qty">{{ item.quantity }}x</span>
+                    <span class="item-name">{{ item.menu_item_name }}</span>
+                    <span v-if="item.note" class="item-note">({{ item.note }})</span>
+                  </div>
+                  <span class="item-price">${{ formatCents(item.unit_price * item.quantity) }}</span>
                 </div>
 
-                <div class="item-right">
-                  <span class="item-price">${{ formatCents(item.unit_price * item.quantity) }}</span>
-
+                <div class="item-status-wrapper">
                   <!-- Status Selector for Staff -->
-                  <OrderItemStatusSelector
-                    v-if="canManageItemStatus"
-                    :status="item.status"
-                    @change="handleStatusChange(item.id, $event)"
-                  />
+                  <OrderItemStatusSelector v-if="canManageItemStatus" :status="item.status"
+                    @change="handleStatusChange(item.id, $event)" />
                   <StatusBadge v-else :status="item.status" />
                 </div>
               </div>
@@ -135,15 +117,10 @@
           <div class="card-footer">
             <button
               v-if="['admin', 'cashier'].includes(authStore.role || '') && ['open', 'checkout_pending'].includes(order.status)"
-              class="btn-primary action-btn"
-              @click="router.push(`/cashier/table/${order.table_id}`)"
-            >
+              class="btn-primary action-btn" @click="router.push(`/cashier/table/${order.table_id}`)">
               Go to Table POS 💳
             </button>
-            <button
-              class="btn-secondary action-btn"
-              @click="selectedOrderModal = order"
-            >
+            <button class="btn-secondary action-btn" @click="selectedOrderModal = order">
               Full Receipt View 📄
             </button>
           </div>
@@ -168,7 +145,8 @@
             <div class="divider"></div>
 
             <div class="receipt-items">
-              <div v-for="item in selectedOrderModal.items.filter((i: any) => i.status !== 'cancelled')" :key="item.id" class="receipt-row">
+              <div v-for="item in selectedOrderModal.items.filter((i: any) => i.status !== 'cancelled')" :key="item.id"
+                class="receipt-row">
                 <span>{{ item.quantity }}x {{ item.menu_item_name }}</span>
                 <span>${{ formatCents(item.unit_price * item.quantity) }}</span>
               </div>
@@ -218,6 +196,7 @@ function calculateOrderTotal(order: any) {
     .filter((item: any) => item.status !== 'cancelled')
     .reduce((sum: number, item: any) => sum + item.unit_price * item.quantity, 0);
 }
+
 
 interface OrderItem {
   id: string;
@@ -399,9 +378,17 @@ onMounted(() => {
 }
 
 @keyframes pulse {
-  0% { opacity: 0.4; }
-  50% { opacity: 1; }
-  100% { opacity: 0.4; }
+  0% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.4;
+  }
 }
 
 .filters-bar {
@@ -581,20 +568,27 @@ onMounted(() => {
 
 .item-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 0.35rem;
   font-size: 0.85rem;
   background: var(--bg-card-hover);
-  padding: 0.4rem 0.6rem;
+  padding: 0.5rem 0.65rem;
   border-radius: 6px;
 }
 
-.item-left {
+.item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.item-info {
   display: flex;
   align-items: center;
   gap: 0.4rem;
   flex: 1;
-  overflow: hidden;
+  min-width: 0;
 }
 
 .item-qty {
@@ -604,6 +598,7 @@ onMounted(() => {
 
 .item-name {
   font-weight: 600;
+  color: var(--text-main);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -615,14 +610,14 @@ onMounted(() => {
   font-style: italic;
 }
 
-.item-right {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
+.item-price {
+  font-weight: 700;
+  color: var(--accent);
+  white-space: nowrap;
 }
 
-.item-price {
-  font-weight: 600;
+.item-status-wrapper {
+  margin-top: 0.1rem;
 }
 
 .status-select {
