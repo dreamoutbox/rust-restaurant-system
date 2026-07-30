@@ -32,38 +32,36 @@
         <div class="ordered-items-list">
           <div v-for="item in activeOrder.items" :key="item.id" class="ordered-item-row">
             <span class="qty">{{ item.quantity }}x</span>
-            <span class="name">{{ item.menu_item_name }}</span>
+            <div class="ordered-item-main">
+              <span class="name">{{ item.menu_item_name }}</span>
+              <span v-if="item.note" class="item-note">Note: {{ item.note }}</span>
+            </div>
             <StatusBadge :status="item.status" />
             <span class="price">${{ formatCents(item.unit_price * item.quantity) }}</span>
           </div>
+        </div>
+
+        <div class="active-order-total">
+          <span>Total Order Price</span>
+          <span class="total-price">${{formatCents(activeOrder.total_amount || activeOrder.items.reduce((sum: number,
+            i: any) => sum + i.unit_price * i.quantity, 0))}}</span>
         </div>
       </section>
 
       <!-- Category Filter Tabs -->
       <div class="category-tabs">
-        <button
-          :class="['tab-btn', { active: selectedCategory === null }]"
-          @click="selectedCategory = null"
-        >
+        <button :class="['tab-btn', { active: selectedCategory === null }]" @click="selectedCategory = null">
           All Items
         </button>
-        <button
-          v-for="cat in categories"
-          :key="cat"
-          :class="['tab-btn', { active: selectedCategory === cat }]"
-          @click="selectedCategory = cat"
-        >
+        <button v-for="cat in categories" :key="cat" :class="['tab-btn', { active: selectedCategory === cat }]"
+          @click="selectedCategory = cat">
           {{ cat }}
         </button>
       </div>
 
       <!-- Menu Grid -->
       <div class="grid-cards">
-        <div
-          v-for="item in filteredMenuItems"
-          :key="item.id"
-          class="menu-card card"
-        >
+        <div v-for="item in filteredMenuItems" :key="item.id" class="menu-card card">
           <div class="item-img" :style="{ backgroundImage: item.image_path ? `url(${item.image_path})` : 'none' }">
             <span v-if="!item.image_path" class="img-placeholder">🍲</span>
           </div>
@@ -108,12 +106,8 @@
             <div class="cart-item-info">
               <h4>{{ entry.item.name }}</h4>
               <span class="unit-price">${{ formatCents(entry.item.price) }}</span>
-              <input
-                v-model="entry.note"
-                type="text"
-                class="form-input note-input"
-                placeholder="Add special instructions (e.g. no onions)"
-              />
+              <input v-model="entry.note" type="text" class="form-input note-input"
+                placeholder="Add special instructions (e.g. no onions)" />
             </div>
             <div class="cart-item-actions">
               <button class="qty-btn" @click="updateCartQty(entry.item.id, -1)">-</button>
@@ -350,8 +344,38 @@ onMounted(() => {
   color: var(--primary);
 }
 
-.ordered-item-row .name {
+.ordered-item-main {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.ordered-item-main .name {
+  font-weight: 600;
+}
+
+.ordered-item-main .item-note {
+  font-size: 0.775rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 0.15rem;
+}
+
+.active-order-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.15);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.active-order-total .total-price {
+  color: var(--accent);
+  font-size: 1.15rem;
+  font-weight: 800;
 }
 
 .ordered-item-row .price {
@@ -449,6 +473,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.6rem;
   background: var(--bg-card-hover);
   border-radius: var(--radius);
   padding: 0.3rem 0.6rem;
@@ -516,10 +541,30 @@ onMounted(() => {
   border-bottom: 1px solid var(--border-color);
 }
 
+.cart-item-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin-right: 0.75rem;
+}
+
+.cart-item-info .unit-price {
+  font-weight: 700;
+  color: var(--accent);
+  margin-top: 0.15rem;
+}
+
+.cart-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
 .note-input {
   margin-top: 0.5rem;
   font-size: 0.8rem;
   padding: 0.4rem;
+  width: 100%;
 }
 
 .drawer-footer {
