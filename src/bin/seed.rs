@@ -1,10 +1,12 @@
 use argon2::{
+    password_hash::{rand_core::OsRng, PasswordHasher, SaltString},
     Argon2,
-    password_hash::{PasswordHasher, SaltString, rand_core::OsRng},
 };
 use dotenvy::dotenv;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
+use std::fs;
+use std::path::Path;
 use uuid::Uuid;
 
 #[tokio::main]
@@ -20,6 +22,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .max_connections(5)
         .connect(&database_url)
         .await?;
+
+    // Ensure ./uploads directory exists
+    let uploads_dir = Path::new("./uploads");
+    if !uploads_dir.exists() {
+        fs::create_dir_all(uploads_dir)?;
+    }
 
     // 1. Seed Users
     println!("Seeding Users...");
@@ -133,8 +141,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     }
 
-    // 4. Seed Menu Items
-    println!("Seeding Menu Items...");
+    // 4. Seed Menu Items & Copy Demo Images
+    println!("Seeding Menu Items with Images...");
     let menu_items_data = [
         (
             "10000000-0000-0000-0000-000000000001",
@@ -224,22 +232,50 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     for (cat_id_str, name, description, price, sort_order) in menu_items_data {
         let category_id = Uuid::parse_str(cat_id_str)?;
+        let src_img = format!("demo/images/{}.jpg", name);
+        let mut image_path: Option<String> = None;
+
+        if Path::new(&src_img).exists() {
+            let dest_file_name = format!("{}.jpg", name.replace(' ', "_"));
+            let dest_path = uploads_dir.join(&dest_file_name);
+            if let Err(e) = fs::copy(&src_img, &dest_path) {
+                println!("Warning: Failed to copy image for {}: {}", name, e);
+            } else {
+                image_path = Some(format!("/uploads/{}", dest_file_name));
+            }
+        }
+
         sqlx::query!(
             r#"
-            INSERT INTO menu_items (category_id, name, description, price, sort_order)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO menu_items (category_id, name, description, price, image_path, sort_order)
+            VALUES ($1, $2, $3, $4, $5, $6)
             ON CONFLICT DO NOTHING
             "#,
             category_id,
             name,
             description,
             price,
+            image_path,
             sort_order
         )
         .execute(&pool)
         .await?;
+
+        // Update image_path if conflict hit or existing item
+        if let Some(ref img_p) = image_path {
+            sqlx::query!(
+                r#"
+                UPDATE menu_items SET image_path = $1 WHERE category_id = $2 AND name = $3
+                "#,
+                img_p,
+                category_id,
+                name
+            )
+            .execute(&pool)
+            .await?;
+        }
     }
 
-    println!("✅ Database seeding completed successfully!");
+    println!("✅ Database seeding with demo images completed successfully!");
     Ok(())
 }
