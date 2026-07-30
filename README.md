@@ -6,22 +6,22 @@ A full-stack, real-time restaurant management system built with high-performance
 
 ## 📸 Demo Showcase
 
-### Table Overview
+#### Table Overview
 ![Table View](screenshots/table-view.png)
 
-### Table Detail & POS
+#### Table Detail & POS
 ![Table Detail View](screenshots/table-detail-view.png)
 
-### Customer Order View
+#### Customer Order View
 ![Customer View](screenshots/customer-view.png)
 
-### Kitchen Dashboard
+#### Kitchen Dashboard
 ![Kitchen View](screenshots/kitchen-view.png)
 
-### Orders Overview
+#### Orders Overview
 ![Order View](screenshots/order-view.png)
 
-### Food Menu & Category Management
+#### Food Menu & Category Management
 ![Food Menu Manage View](screenshots/food-menu-manage-view.png)
 
 ---
@@ -51,17 +51,17 @@ A full-stack, real-time restaurant management system built with high-performance
 - **Payments**: Stripe API integration
 
 ### Frontend
-- **Framework**: Vue 3 (Composition API `<script setup>`), TypeScript, Vite
+- **Framework**: Vue 3 (Composition API), TypeScript, Vite
 - **State & Routing**: Pinia, Vue Router
-- **Styling**: Vanilla CSS Design System with dark mode glassmorphism aesthetics
+- **Styling**: Vanilla CSS with dark mode
 
 ---
 
 ## 🚀 Development Setup
 
 ### Prerequisites
-- **Rust**: `rustc` and `cargo` (edition 2021)
-- **Node.js**: v18+ with `pnpm`
+- **Rust**: `rustc` and `cargo` (edition 2024)
+- **Node.js**: v25.7.0+ with `pnpm`
 - **PostgreSQL**: PostgreSQL server running locally or via Docker
 
 ### Quick Start
@@ -83,19 +83,18 @@ A full-stack, real-time restaurant management system built with high-performance
 3. **Database Initialization & Seeding**:
    Run database reset and seed script (seeds users, tables, categories, menu items, and copies demo dish images):
    ```bash
-   chmod +x db-reset.sh
    ./db-reset.sh
    ```
 
 4. **Run Development Server**:
-   Start both backend (`cargo watch`) and frontend (`vite dev`) concurrently:
+   Start both backend (`cargo watch`) and frontend (`vite dev`) with watch mode:
    ```bash
-   chmod +x dev.sh
    ./dev.sh
    ```
 
    - **Frontend App**: [http://localhost:5173](http://localhost:5173)
    - **Backend API**: [http://localhost:3000](http://localhost:3000)
+   - **Adminer**: [http://localhost:9001](http://localhost:9001)
 
 ---
 
