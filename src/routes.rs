@@ -3,7 +3,7 @@ use axum::{
     routing::{get, patch, post, put},
 };
 use tower_http::cors::{Any, CorsLayer};
-use tower_http::services::ServeDir;
+use tower_http::services::{ServeDir, ServeFile};
 
 use crate::handlers::{
     auth::{AppState, get_me, login, logout},
@@ -80,8 +80,16 @@ pub fn create_router(state: AppState) -> Router {
         .route("/events", get(sse_handler))
         .with_state(state.clone());
 
-    Router::new()
+    let mut router = Router::new()
         .nest("/api", api_routes)
-        .nest_service("/uploads", ServeDir::new(&state.config.upload_dir))
-        .layer(cors)
+        .nest_service("/uploads", ServeDir::new(&state.config.upload_dir));
+
+    let static_dir = std::path::Path::new("web/dist");
+    if static_dir.exists() {
+        let serve_spa =
+            ServeDir::new(static_dir).fallback(ServeFile::new(static_dir.join("index.html")));
+        router = router.fallback_service(serve_spa);
+    }
+
+    router.layer(cors)
 }

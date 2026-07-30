@@ -52,12 +52,12 @@ jobs:
 
       - name: Package Release Assets
         run: |
-          mkdir -p release-pack
+          mkdir -p release-pack/web
           cp target/release/rust-restaurant-system release-pack/
           cp target/release/seed release-pack/
           cp -r migrations release-pack/
           cp -r demo release-pack/
-          cp -r web/dist release-pack/web-dist
+          cp -r web/dist release-pack/web/dist
           cp db-reset.sh release-pack/
           cp dev.sh release-pack/
           cp README.md release-pack/
