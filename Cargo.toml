@@ -1,6 +1,6 @@
 [package]
 name = "rust-restaurant-system"
-version = "1.0.1"
+version = "1.0.2"
 edition = "2024"
 default-run = "rust-restaurant-system"
 description = "restaurant system in Rust and Vue 3."
