@@ -10,24 +10,13 @@
       <form @submit.prevent="handleLogin">
         <div class="form-group">
           <label>Username</label>
-          <input
-            v-model="username"
-            type="text"
-            class="form-input"
-            placeholder="admin, cashier1, kitchen1, waiter1"
-            required
-          />
+          <input v-model="username" type="text" class="form-input" placeholder="admin, cashier1, kitchen1, waiter1"
+            required />
         </div>
 
         <div class="form-group">
           <label>Password</label>
-          <input
-            v-model="password"
-            type="password"
-            class="form-input"
-            placeholder="Enter password"
-            required
-          />
+          <input v-model="password" type="password" class="form-input" placeholder="Enter password" required />
         </div>
 
         <div v-if="errorMessage" class="error-box">
@@ -39,15 +28,6 @@
         </button>
       </form>
 
-      <div class="demo-hints">
-        <h4>Demo Accounts (Password: admin / password):</h4>
-        <ul>
-          <li><strong>admin</strong> / admin</li>
-          <li><strong>cashier1</strong> / password</li>
-          <li><strong>kitchen1</strong> / password</li>
-          <li><strong>waiter1</strong> / password</li>
-        </ul>
-      </div>
     </div>
   </div>
 </template>
@@ -145,25 +125,5 @@ async function handleLogin() {
   border-radius: 8px;
   font-size: 0.875rem;
   margin-bottom: 1rem;
-}
-
-.demo-hints {
-  margin-top: 2rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--border-color);
-  font-size: 0.825rem;
-  color: var(--text-muted);
-}
-
-.demo-hints h4 {
-  color: white;
-  margin-bottom: 0.5rem;
-}
-
-.demo-hints ul {
-  list-style: none;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.4rem;
 }
 </style>
