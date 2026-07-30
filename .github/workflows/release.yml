@@ -1,0 +1,76 @@
+name: Release App
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+env:
+  SQLX_OFFLINE: "true"
+
+jobs:
+  build-release:
+    name: Build & Create GitHub Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js & pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install & Build Web Frontend
+        run: |
+          pnpm --prefix web install
+          pnpm --prefix web build
+
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build Rust Release Binaries
+        env:
+          SQLX_OFFLINE: "true"
+        run: |
+          cargo build --release --bin rust-restaurant-system
+          cargo build --release --bin seed
+
+      - name: Package Release Assets
+        run: |
+          mkdir -p release-pack
+          cp target/release/rust-restaurant-system release-pack/
+          cp target/release/seed release-pack/
+          cp -r migrations release-pack/
+          cp -r demo release-pack/
+          cp -r web/dist release-pack/web-dist
+          cp db-reset.sh release-pack/
+          cp dev.sh release-pack/
+          cp README.md release-pack/
+          cd release-pack
+          tar -czvf ../rust-restaurant-system-linux-x86_64.tar.gz *
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            rust-restaurant-system-linux-x86_64.tar.gz
+            target/release/rust-restaurant-system
+            target/release/seed
+          draft: false
+          prerelease: false
+          generate_release_notes: true
