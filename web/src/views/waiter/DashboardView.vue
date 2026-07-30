@@ -34,6 +34,12 @@
           Served ✅ ({{ countByStatus('served') }})
         </button>
         <button
+          :class="['tab-btn', { active: activeFilter === 'cancelled' }]"
+          @click="activeFilter = 'cancelled'"
+        >
+          Cancelled 🚫 ({{ countByStatus('cancelled') }})
+        </button>
+        <button
           :class="['tab-btn', { active: activeFilter === 'all' }]"
           @click="activeFilter = 'all'"
         >
@@ -67,33 +73,8 @@
             Note: {{ item.note }}
           </div>
 
-          <!-- All status control buttons for revert/misclick handling -->
-          <div class="status-btn-group">
-            <button
-              :class="['status-btn', { active: item.status === 'pending' }]"
-              @click="updateItemStatus(item.id, 'pending')"
-            >
-              Pending
-            </button>
-            <button
-              :class="['status-btn', { active: item.status === 'preparing' }]"
-              @click="updateItemStatus(item.id, 'preparing')"
-            >
-              Preparing 🔥
-            </button>
-            <button
-              :class="['status-btn', { active: item.status === 'finished' }]"
-              @click="updateItemStatus(item.id, 'finished')"
-            >
-              Finished ✅
-            </button>
-            <button
-              :class="['status-btn', { active: item.status === 'served' }]"
-              @click="updateItemStatus(item.id, 'served')"
-            >
-              Served 🛎️
-            </button>
-          </div>
+          <!-- Reusable status control buttons -->
+          <OrderItemStatusSelector :status="item.status" @change="updateItemStatus(item.id, $event)" />
         </div>
       </div>
     </div>
@@ -104,6 +85,7 @@
 import { ref, computed, onMounted } from 'vue';
 import AppLayout from '../../components/AppLayout.vue';
 import StatusBadge from '../../components/StatusBadge.vue';
+import OrderItemStatusSelector from '../../components/OrderItemStatusSelector.vue';
 import { api } from '../../composables/useApi.ts';
 import { useSse } from '../../composables/useSse.ts';
 
@@ -138,6 +120,9 @@ const filteredItems = computed(() => {
   }
   if (activeFilter.value === 'served') {
     return allItems.value.filter((i) => i.status === 'served');
+  }
+  if (activeFilter.value === 'cancelled') {
+    return allItems.value.filter((i) => i.status === 'cancelled');
   }
   return allItems.value;
 });

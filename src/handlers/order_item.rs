@@ -28,10 +28,10 @@ pub async fn update_order_item_status(
         &[UserRole::Admin, UserRole::Kitchen, UserRole::Waiter],
     )?;
 
-    let valid_statuses = ["pending", "preparing", "finished", "served"];
+    let valid_statuses = ["pending", "preparing", "finished", "served", "cancelled"];
     if !valid_statuses.contains(&payload.status.as_str()) {
         return Err(AppError::BadRequest(format!(
-            "Invalid status '{}'. Must be one of: pending, preparing, finished, served",
+            "Invalid status '{}'. Must be one of: pending, preparing, finished, served, cancelled",
             payload.status
         )));
     }

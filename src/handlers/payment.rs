@@ -25,7 +25,10 @@ pub async fn checkout_order(
     require_role(&claims, &[UserRole::Admin, UserRole::Cashier])?;
 
     let _order = sqlx::query!(
-        "SELECT id, table_id, status FROM orders WHERE id = $1 AND status IN ('open', 'checkout_pending')",
+        r#"
+        SELECT id, table_id, status 
+        FROM orders 
+        WHERE id = $1 AND status IN ('open', 'checkout_pending')"#,
         order_id
     )
     .fetch_optional(&state.db)
@@ -37,7 +40,7 @@ pub async fn checkout_order(
         r#"
         SELECT COALESCE(SUM(quantity * unit_price), 0)::bigint as "total!: i64"
         FROM order_items
-        WHERE order_id = $1
+        WHERE order_id = $1 AND status != 'cancelled'
         "#,
         order_id
     )

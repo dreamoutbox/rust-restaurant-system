@@ -97,7 +97,7 @@
           <div class="items-container">
             <div class="items-header">
               <span>Items ({{ order.items.length }})</span>
-              <span class="items-total">Total: ${{ formatCents(order.total_amount) }}</span>
+              <span class="items-total">Total: ${{ formatCents(calculateOrderTotal(order)) }}</span>
             </div>
 
             <div v-if="order.items.length === 0" class="no-items">
@@ -120,18 +120,11 @@
                   <span class="item-price">${{ formatCents(item.unit_price * item.quantity) }}</span>
 
                   <!-- Status Selector for Staff -->
-                  <div class="status-action" v-if="canManageItemStatus">
-                    <select
-                      :value="item.status"
-                      @change="handleStatusChange(item.id, ($event.target as HTMLSelectElement).value)"
-                      class="status-select"
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="preparing">Preparing</option>
-                      <option value="finished">Finished</option>
-                      <option value="served">Served</option>
-                    </select>
-                  </div>
+                  <OrderItemStatusSelector
+                    v-if="canManageItemStatus"
+                    :status="item.status"
+                    @change="handleStatusChange(item.id, $event)"
+                  />
                   <StatusBadge v-else :status="item.status" />
                 </div>
               </div>
@@ -175,7 +168,7 @@
             <div class="divider"></div>
 
             <div class="receipt-items">
-              <div v-for="item in selectedOrderModal.items" :key="item.id" class="receipt-row">
+              <div v-for="item in selectedOrderModal.items.filter((i: any) => i.status !== 'cancelled')" :key="item.id" class="receipt-row">
                 <span>{{ item.quantity }}x {{ item.menu_item_name }}</span>
                 <span>${{ formatCents(item.unit_price * item.quantity) }}</span>
               </div>
@@ -194,7 +187,7 @@
               </div>
               <div class="summary-row total-line">
                 <span>Grand Total:</span>
-                <span class="total-price">${{ formatCents(selectedOrderModal.total_amount) }}</span>
+                <span class="total-price">${{ formatCents(calculateOrderTotal(selectedOrderModal)) }}</span>
               </div>
             </div>
           </div>
@@ -217,6 +210,14 @@ import StatusBadge from '../../components/StatusBadge.vue';
 import { api } from '../../composables/useApi.ts';
 import { useAuthStore } from '../../stores/auth.ts';
 import { useSse } from '../../composables/useSse.ts';
+import OrderItemStatusSelector from '../../components/OrderItemStatusSelector.vue';
+
+function calculateOrderTotal(order: any) {
+  if (!order || !order.items) return 0;
+  return order.items
+    .filter((item: any) => item.status !== 'cancelled')
+    .reduce((sum: number, item: any) => sum + item.unit_price * item.quantity, 0);
+}
 
 interface OrderItem {
   id: string;

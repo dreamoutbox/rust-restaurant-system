@@ -57,7 +57,7 @@
           <div class="order-header">
             <h3>Active Order #{{ activeOrderDetail?.id.slice(0, 8) }}</h3>
             <span class="total-badge" v-if="activeOrderDetail">
-              Total: ${{ formatCents(activeOrderDetail.total_amount) }}
+              Total: ${{ formatCents(calculateActiveOrderTotal()) }}
             </span>
           </div>
 
@@ -135,6 +135,13 @@ const processing = ref(false);
 function formatCents(cents: number | string) {
   const c = typeof cents === 'string' ? parseInt(cents, 10) : cents;
   return ((c || 0) / 100).toFixed(2);
+}
+
+function calculateActiveOrderTotal() {
+  if (!activeOrderDetail.value || !activeOrderDetail.value.items) return 0;
+  return activeOrderDetail.value.items
+    .filter((item: any) => item.status !== 'cancelled')
+    .reduce((sum: number, item: any) => sum + item.unit_price * item.quantity, 0);
 }
 
 const { isConnected, connect } = useSse((event) => {

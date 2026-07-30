@@ -40,6 +40,12 @@
           Finished ✅ ({{ countByStatus('finished') }})
         </button>
         <button
+          :class="['tab-btn', { active: activeFilter === 'cancelled' }]"
+          @click="activeFilter = 'cancelled'"
+        >
+          Cancelled 🚫 ({{ countByStatus('cancelled') }})
+        </button>
+        <button
           :class="['tab-btn', { active: activeFilter === 'all' }]"
           @click="activeFilter = 'all'"
         >
@@ -82,32 +88,7 @@
             Received: {{ formatTime(item.created_at) }}
           </div>
 
-          <div class="status-btn-group">
-            <button
-              :class="['status-btn', { active: item.status === 'pending' }]"
-              @click="updateStatus(item.id, 'pending')"
-            >
-              Pending
-            </button>
-            <button
-              :class="['status-btn', { active: item.status === 'preparing' }]"
-              @click="updateStatus(item.id, 'preparing')"
-            >
-              Preparing 🔥
-            </button>
-            <button
-              :class="['status-btn', { active: item.status === 'finished' }]"
-              @click="updateStatus(item.id, 'finished')"
-            >
-              Finished ✅
-            </button>
-            <button
-              :class="['status-btn', { active: item.status === 'served' }]"
-              @click="updateStatus(item.id, 'served')"
-            >
-              Served 🛎️
-            </button>
-          </div>
+          <OrderItemStatusSelector :status="item.status" @change="updateStatus(item.id, $event)" />
         </div>
       </div>
     </div>
@@ -118,6 +99,7 @@
 import { ref, computed, onMounted } from 'vue';
 import AppLayout from '../../components/AppLayout.vue';
 import StatusBadge from '../../components/StatusBadge.vue';
+import OrderItemStatusSelector from '../../components/OrderItemStatusSelector.vue';
 import { api } from '../../composables/useApi.ts';
 import { useSse } from '../../composables/useSse.ts';
 
@@ -156,6 +138,9 @@ const filteredItems = computed(() => {
   }
   if (activeFilter.value === 'finished') {
     return allItems.value.filter((i) => i.status === 'finished');
+  }
+  if (activeFilter.value === 'cancelled') {
+    return allItems.value.filter((i) => i.status === 'cancelled');
   }
   return allItems.value;
 });
