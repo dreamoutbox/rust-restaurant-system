@@ -1,0 +1,4 @@
+# cargo-release configuration
+tag = true
+push = true
+publish = false
