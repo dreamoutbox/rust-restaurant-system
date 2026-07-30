@@ -45,5 +45,5 @@ pub struct SubmitOrderItemsReq {
 
 #[derive(Debug, Deserialize)]
 pub struct UpdateOrderItemStatusReq {
-    pub status: String, // pending, preparing, finished, served
+    pub status: String, // pending, preparing, finished, served, cancelled
 }
