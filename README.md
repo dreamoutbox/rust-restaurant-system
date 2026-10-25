@@ -4,6 +4,19 @@ A full-stack, real-time restaurant management system built with high-performance
 
 ---
 
+## 🔑 Demo Accounts
+
+Default credentials for testing different role permissions (Password: `admin` or `password`):
+
+| Role | Username | Password | Access Level |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin` | `admin` | Full system configuration & management |
+| **Cashier** | `cashier1` | `password` | POS checkout, receipts & table management |
+| **Kitchen** | `kitchen1` | `password` | Kitchen queue & dish status updates |
+| **Waiter** | `waiter1` | `password` | Waiter dashboard & order status tracking |
+
+---
+
 ## 📸 Demo Showcase
 
 #### Table Overview
@@ -95,16 +108,3 @@ A full-stack, real-time restaurant management system built with high-performance
    - **Frontend App**: [http://localhost:5173](http://localhost:5173)
    - **Backend API**: [http://localhost:3000](http://localhost:3000)
    - **Adminer**: [http://localhost:9001](http://localhost:9001)
-
----
-
-## 🔑 Demo Accounts
-
-Default credentials for testing different role permissions (Password: `admin` or `password`):
-
-| Role | Username | Password | Access Level |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `admin` | `admin` | Full system configuration & management |
-| **Cashier** | `cashier1` | `password` | POS checkout, receipts & table management |
-| **Kitchen** | `kitchen1` | `password` | Kitchen queue & dish status updates |
-| **Waiter** | `waiter1` | `password` | Waiter dashboard & order status tracking |
